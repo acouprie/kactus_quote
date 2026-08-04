@@ -35,6 +35,20 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(response.body).to include("360,00\u{202F}€")
       end
 
+      it "enables the validate button once the first item is added" do
+        post quote_items_path(quote),
+             params: { quote_item: { name: "Location de salle", quantity: "2", unit_price_excl_vat: "150", vat_rate: "20" } },
+             as: :turbo_stream
+
+        expect(response.body).to include(%(target="quote_validate_button"))
+        # The button lives inside a <turbo-stream><template>, whose content Capybara's string
+        # parser strips (it is not part of the live document until Turbo moves it out), so the
+        # disabled attribute is asserted with Nokogiri directly rather than Capybara matchers.
+        container = Nokogiri::HTML(response.body).at_css("#quote_validate_button")
+        expect(container.at_css("button")["disabled"]).to be_nil
+        expect(container.at_css(".hint")).to be_nil
+      end
+
       it "reads a French decimal separator on quantity and unit price" do
         post quote_items_path(quote),
              params: { quote_item: { name: "Location de salle", quantity: "1,5", unit_price_excl_vat: "12,50", vat_rate: "20" } },
@@ -129,6 +143,17 @@ RSpec.describe "Quotes::Items", type: :request do
       rendered = Capybara.string(response.body)
       expect(rendered).to have_css("turbo-stream[action='remove'][target='quote_item_#{item.id}']")
       expect(rendered).to have_css("turbo-stream[action='replace'][target='quote_totals']")
+    end
+
+    it "disables the validate button again once the last item is destroyed" do
+      item = create(:quote_item, quote: quote)
+
+      delete quote_item_path(quote, item), as: :turbo_stream
+
+      expect(response.body).to include(%(target="quote_validate_button"))
+      container = Nokogiri::HTML(response.body).at_css("#quote_validate_button")
+      expect(container.at_css("button")["disabled"]).to eq("disabled")
+      expect(container.at_css(".hint")).not_to be_nil
     end
   end
 end

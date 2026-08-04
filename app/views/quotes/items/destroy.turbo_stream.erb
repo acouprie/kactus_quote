@@ -3,3 +3,7 @@
 <%= turbo_stream.replace "quote_totals" do %>
   <%= render "quotes/totals", totals: @totals %>
 <% end %>
+
+<%= turbo_stream.replace "quote_validate_button" do %>
+  <%= render "quotes/validate_button", quote: @quote %>
+<% end %>

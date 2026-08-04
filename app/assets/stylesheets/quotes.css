@@ -145,6 +145,32 @@ turbo-frame {
   color: #ffffff;
 }
 
+.button--validate {
+  background: #ffd71c;
+  border-color: #ffd71c;
+  color: var(--color-ink);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quote-validate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-align: right;
+}
+
 .inline-form__row {
   display: flex;
   align-items: center;

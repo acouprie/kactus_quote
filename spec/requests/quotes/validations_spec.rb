@@ -42,16 +42,17 @@ RSpec.describe "Quotes::Validations", type: :request do
   end
 
   describe "GET /quotes/:id, draft screen validate button" do
-    it "disables the validate button when the quote has no item" do
+    it "disables the validate button when the quote has no item, with a visible explanation" do
       quote = create(:quote, status: :draft)
 
       get quote_path(quote)
       rendered = Capybara.string(response.body)
 
       expect(rendered).to have_button("Valider le devis", disabled: true)
+      expect(rendered).to have_content(I18n.t("quotes.quote_screen.validate_disabled_title"))
     end
 
-    it "enables the validate button once the quote has an item" do
+    it "enables the validate button once the quote has an item, with no explanation shown" do
       quote = create(:quote, status: :draft)
       create(:quote_item, quote: quote)
 
@@ -59,6 +60,7 @@ RSpec.describe "Quotes::Validations", type: :request do
       rendered = Capybara.string(response.body)
 
       expect(rendered).to have_button("Valider le devis", disabled: false)
+      expect(rendered).to have_no_content(I18n.t("quotes.quote_screen.validate_disabled_title"))
     end
   end
 end

@@ -21,9 +21,5 @@
   <%= render "items_table", quote: quote, totals: totals %>
   <%= render "totals", totals: totals %>
 
-  <%= button_to t("quotes.quote_screen.validate"),
-        quote_validation_path(quote),
-        class: "button button--primary",
-        disabled: quote.quote_items.empty?,
-        title: (t("quotes.quote_screen.validate_disabled_title") if quote.quote_items.empty?) %>
+  <%= render "validate_button", quote: quote %>
 </div>

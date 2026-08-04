@@ -106,6 +106,7 @@ fr:
       exit: "Quitter"
       validate: "Valider le devis"
       validate_disabled_title: "Ajoutez au moins un article avant de valider le devis"
+      validate_confirm: "Voulez-vous vraiment valider ce devis ? Cette action est définitive."
       table:
         article: "Article"
         quantity: "Qte"
