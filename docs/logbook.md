@@ -667,3 +667,111 @@ prefix indicating the type of work, followed by the story number and name, in En
 I follow the specifications as closely as possible without over-interpreting. Where the brief was
 silent and the recruiter deliberately left the choice to me, I record the assumption here rather
 than leaving it implicit in the code.
+
+One subsection per story, kept short on purpose: the reasoning behind each decision already has a
+home elsewhere in this file or in `architecture.md`, and is not repeated here. What follows is what
+does not fit anywhere else, mostly things learned or corrected along the way.
+
+### Story 0 — Project setup
+
+Docker Compose, RSpec/FactoryBot/Shoulda/Capybara and the `selenium/standalone-chromium` service are
+wired in before any feature code, so every later story can rely on a working system-spec harness
+from day one rather than bolting it on when the first Turbo interaction needs testing. The branch
+went through a couple of name changes along the way, typos included, and stayed that way rather than
+being rewritten: not worth the history churn for a local branch name.
+
+### Story 1 — Domain models
+
+`Quote` and `QuoteItem` land with their validations and the two decimal columns. The precision fix
+in the second commit (`unit_price_excl_vat` and `quantity` sharing the same `decimal(10, 2)`) is the
+first concrete instance of the money-representation rule in "Project setup", caught by re-reading
+the migration rather than by a test, which is the kind of thing a schema review checklist would have
+caught earlier and slightly cheaper.
+
+### Story 2 — Amount computation
+
+`QuoteTotals` and the VAT computation contract are implemented together, since the algorithm only
+makes sense against actual numbers. The specs went through a deliberate second pass, replacing
+assertions like `total_gross_amount == total_net_amount + total_vat_amount` with concrete expected
+figures (see `spec/models/quote_totals_spec.rb`). The invariant-only version would still pass if the
+computation were wrong in a way that stayed internally consistent, for instance if every rate were
+silently divided by 10; asserting the actual numbers closes that gap, and the two named invariants
+from "Testing strategy" are kept as an addition on top, not a replacement.
+
+### Story 3 — Quote list screen
+
+The list and the inline creation row are the first Turbo Frame in the project, which is also where
+the decision recorded under "Screens and navigation" (reusing the add-item row's pattern for adding a
+quote) actually gets exercised for the first time.
+
+### Story 4 — Quote screen
+
+Read-only item display lands before item management (story 5) does, so the table, the totals block
+and the draft/validated split described in "Screens and navigation" exist as static rendering first,
+which kept this story's diff to the display path only, with nothing yet to break on write.
+
+### Story 5 — Item management
+
+The turbo-frame-in-table constraint described under "Turbo and Stimulus specifics" surfaces here: a
+`<turbo-frame>` as a direct child of `<tr>` gets foster-parented out of the table by the HTML
+parser, silently breaking the layout. The fix, a frame nested inside a `<td>` rather than replacing
+the row, is the pattern the rest of the item table follows.
+
+### Story 6 — Quote validation
+
+`Quotes::ValidationsController` and `finalize!` land first with the disabled-button affordance from
+"Validating an empty quote" following in a second pass on the same branch, once the plain button was
+in front of a browser and the missing hint was obviously the next thing to fix.
+
+### Story 7 — Immutability of a validated quote
+
+The guard described in "Quote lifecycle" (both models raising `Quote::ImmutableError` off the
+persisted status) is the last piece before the application matches the non-negotiable rule from the
+brief. Writing the request spec that sends a direct `PATCH` to an item of a validated quote, bypassing
+every button the interface offers, is what actually proves the rule lives in the model and not in a
+disabled button.
+
+### Story 8 — End-to-end tests
+
+Writing the seed data surfaced a real instance of the rule this story exists to exercise: creating
+the "already validated" quote by setting `status: :validated` at `find_or_create_by!` time, then
+calling `quote.quote_items.create!` on it, raises `Quote::ImmutableError`, because by then the guard
+reads a persisted status that is already `validated`. The fix is the same one a user would have to
+follow by hand: add the items while the quote is still a draft, and validate it last. A seed script
+turning out to be a genuine (if low-stakes) exercise of the immutability rule was not expected going
+in, and is exactly the kind of thing this file exists to note down.
+
+The full-flow system spec composes three earlier stories (creation, item management, validation)
+rather than introducing new behaviour, and one implementation detail was easy to get wrong writing
+it: the add-item form resets and keeps focus in place after a successful submission (see "Turbo and
+Stimulus specifics"), so adding a second and third item does not need a second click on "Ajouter un
+article" the way opening the form the first time does.
+
+## Retrospective
+
+What I would keep doing on a real project: writing the diagrams and the VAT computation contract
+before any code, since the one time the algorithm changed shape (the tautological-invariant fix in
+story 2) it was a test problem, not a design problem, precisely because the design had already been
+argued through on paper. Recording every silent-brief decision in this file as it happened, rather
+than reconstructing the reasoning at the end, is the other habit worth keeping: several of the
+per-story notes above quote a specific commit because the file was open while the commit was being
+written, not after.
+
+What I would do differently: the immutability guard (story 7) landed after quote validation (story
+6) and item management (story 5), which means both of those stories were, for a while, only as safe
+as their controllers' good behaviour rather than the model's. Nothing broke in this project because
+of the ordering, but on a team with more than one contributor touching those controllers in between,
+that window is exactly where a bypass would sneak in unnoticed. Sequencing the guard first, even as
+an empty `raise` with the real check filled in once the state machine existed, would have made every
+later story's tests strictly additive instead of retroactively proving a rule the code did not enforce
+yet.
+
+The Definition of Done in the README asks for review "by Claude Code acting as a PR reviewer,
+issues addressed or logged". In practice that review happened continuously, inside the same
+conversation as the implementation, rather than as a separate pass after each branch was opened as a
+PR; the GitHub Action is configured and would run standalone review comments on a real pull request,
+but none of the branches in this exercise have been merged through one, so the workflow itself is
+unexercised in anger. The seed-script bug in story 8 above is a small proof that a second pass,
+whether from a human, an AI reviewer, or just running the code, catches things the first pass does
+not: none of the code paths it touches were new, and it still shipped broken until something actually
+ran it.
