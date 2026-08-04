@@ -1,13 +1,13 @@
 class QuoteItem < ApplicationRecord
-  MAX_AMOUNT = 99_999.99
-  ALLOWED_VAT_RATES = [ 0, 5.5, 10, 20 ].freeze
+  MAX_INPUT_VALUE = BigDecimal("99999.99")
+  ALLOWED_VAT_RATES = %w[0 5.5 10 20].map { |rate| BigDecimal(rate) }.freeze
 
   belongs_to :quote
 
   validates :name, presence: true
-  validates :quantity, numericality: { greater_than: 0, less_than_or_equal_to: MAX_AMOUNT }
+  validates :quantity, numericality: { greater_than: 0, less_than_or_equal_to: MAX_INPUT_VALUE }
   validates :unit_price_excl_vat,
-            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: MAX_AMOUNT }
+            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: MAX_INPUT_VALUE }
   validates :vat_rate, inclusion: { in: ALLOWED_VAT_RATES }
 
   validate :quantity_scale_must_not_exceed_column_precision
@@ -26,7 +26,8 @@ class QuoteItem < ApplicationRecord
   def normalize_decimal_separator(value)
     return value unless value.is_a?(String)
 
-    value.tr(",", ".")
+    # Replace comma with dot and remove all spaces
+    value.tr(",", ".").delete(" \u00A0\u202F")
   end
 
   def quantity_scale_must_not_exceed_column_precision
