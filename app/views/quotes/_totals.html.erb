@@ -1,0 +1,14 @@
+<dl class="totals">
+  <div class="totals__row totals__row--net">
+    <dt><%= t("quotes.quote_screen.totals.net") %></dt>
+    <dd><%= number_to_currency(totals.total_net_amount) %></dd>
+  </div>
+  <div class="totals__row totals__row--vat">
+    <dt><%= t("quotes.quote_screen.totals.vat") %></dt>
+    <dd><%= number_to_currency(totals.total_vat_amount) %></dd>
+  </div>
+  <div class="totals__row totals__row--gross">
+    <dt><%= t("quotes.quote_screen.totals.gross") %></dt>
+    <dd><%= number_to_currency(totals.total_gross_amount) %></dd>
+  </div>
+</dl>

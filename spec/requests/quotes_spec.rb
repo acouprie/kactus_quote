@@ -83,6 +83,69 @@ RSpec.describe "Quotes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(quote.name)
     end
+
+    context "when the quote is a draft" do
+      it "renders the draft variant with an editable name and the save-and-exit action" do
+        quote = create(:quote, name: "Devis salle de réception", status: :draft)
+
+        get quote_path(quote)
+        rendered = Capybara.string(response.body)
+
+        expect(rendered).to have_css("input[name='quote[name]'][value='#{quote.name}']")
+        expect(rendered).to have_content("En cours d'édition")
+        expect(rendered).to have_button("Enregistrer et quitter")
+        expect(rendered).to have_no_link("Quitter")
+      end
+
+      it "formats amounts and VAT rates with French conventions" do
+        quote = create(:quote, status: :draft)
+        create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 1234.56, vat_rate: 5.5)
+
+        get quote_path(quote)
+
+        expect(response.body).to include("1 234,56 €")
+        expect(response.body).to include("5,5 %")
+      end
+    end
+
+    context "when the quote is validated" do
+      it "renders the read-only variant with a plain exit link and no draft affordances" do
+        quote = create(:quote, status: :validated, validated_at: Time.current)
+
+        get quote_path(quote)
+        rendered = Capybara.string(response.body)
+
+        expect(rendered).to have_content("Validé")
+        expect(rendered).to have_link("Quitter", href: quotes_path)
+        expect(rendered).to have_no_css("input[name='quote[name]']")
+        expect(rendered).to have_no_button("Enregistrer et quitter")
+      end
+    end
+  end
+
+  describe "PATCH /quotes/:id" do
+    context "with a valid name" do
+      it "renames the quote and redirects to the list with a 303" do
+        quote = create(:quote, name: "Ancien nom", status: :draft)
+
+        patch quote_path(quote), params: { quote: { name: "Nouveau nom" } }
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quotes_path)
+        expect(quote.reload.name).to eq("Nouveau nom")
+      end
+    end
+
+    context "with a blank name" do
+      it "does not persist the change and responds 422, re-rendering the screen" do
+        quote = create(:quote, name: "Nom initial", status: :draft)
+
+        patch quote_path(quote), params: { quote: { name: "" } }
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(quote.reload.name).to eq("Nom initial")
+      end
+    end
   end
 
   describe "DELETE /quotes/:id" do

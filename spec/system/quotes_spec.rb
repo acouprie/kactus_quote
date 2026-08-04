@@ -8,7 +8,7 @@ RSpec.describe "Quotes list, inline creation row", type: :system do
     fill_in "quote_name", with: "Devis salle de réception"
     click_button "Valider"
 
-    expect(page).to have_content("Devis salle de réception")
+    expect(page).to have_field("quote_name", with: "Devis salle de réception")
     expect(page).to have_current_path(quote_path(Quote.last))
     expect(page).not_to have_content("Content missing")
   end

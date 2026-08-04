@@ -1,12 +1,12 @@
 class QuotesController < ApplicationController
-  before_action :set_quote, only: %i[destroy]
+  before_action :set_quote, only: %i[show update destroy]
 
   def index
     @quotes = Quote.order(created_at: :desc)
   end
 
   def show
-    @quote = Quote.find(params[:id])
+    @totals = QuoteTotals.new(@quote)
   end
 
   def new
@@ -22,6 +22,17 @@ class QuotesController < ApplicationController
     else
       @quotes = Quote.order(created_at: :desc)
       render :index, status: :unprocessable_content
+    end
+  end
+
+  def update
+    @quote.with_lock { @quote.update(quote_params) }
+
+    if @quote.errors.empty?
+      redirect_to quotes_path, status: :see_other
+    else
+      @totals = QuoteTotals.new(@quote)
+      render :show, status: :unprocessable_content
     end
   end
 

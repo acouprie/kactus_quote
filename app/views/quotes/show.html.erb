@@ -1,5 +1,9 @@
 <% content_for :title, @quote.name %>
 
-<h1><%= @quote.name %></h1>
-
-<%= link_to t("quotes.back_to_list"), quotes_path %>
+<div class="page">
+  <% if @quote.draft? %>
+    <%= render "draft_screen", quote: @quote, totals: @totals %>
+  <% else %>
+    <%= render "validated_screen", quote: @quote, totals: @totals %>
+  <% end %>
+</div>

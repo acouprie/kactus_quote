@@ -1,0 +1,15 @@
+<div class="quote-header">
+  <%= form_with model: quote, method: :patch, class: "quote-header__form" do |form| %>
+    <%= form.text_field :name, class: "input quote-header__name-input" %>
+    <span class="badge badge--draft"><%= t("quotes.quote_screen.draft_badge") %></span>
+    <%= form.submit t("quotes.quote_screen.save_and_exit"), class: "button button--primary" %>
+  <% end %>
+
+  <% if quote.errors.any? %>
+    <ul class="inline-form__errors">
+      <% quote.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>
