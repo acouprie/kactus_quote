@@ -1,0 +1,5 @@
+<%= turbo_stream.remove @item %>
+
+<%= turbo_stream.replace "quote_totals" do %>
+  <%= render "quotes/totals", totals: @totals %>
+<% end %>

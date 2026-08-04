@@ -1,0 +1,23 @@
+<%= turbo_frame_tag dom_id(item, :frame), class: "items-row-frame" do %>
+  <div class="items-row">
+    <div class="items-row__cell items-row__cell--name"><%= item.name %></div>
+    <div class="items-row__cell items-row__cell--quantity"><%= number_with_precision(item.quantity, strip_insignificant_zeros: true) %></div>
+    <div class="items-row__cell items-row__cell--unit-price"><%= number_to_currency(item.unit_price_excl_vat) %></div>
+    <div class="items-row__cell items-row__cell--vat"><%= number_to_percentage(item.vat_rate) %></div>
+    <div class="items-row__cell items-row__cell--net-preview"><%= number_to_currency(line.line_net_amount) %></div>
+    <div class="items-row__cell items-row__cell--gross-preview"><%= number_to_currency(line.line_gross_amount) %></div>
+    <div class="items-row__cell items-row__cell--actions">
+      <%= link_to edit_quote_item_path(item.quote, item), class: "icon-button", aria: { label: t("quotes.items.edit") } do %>
+        <%= pencil_icon %>
+      <% end %>
+      <%= button_to quote_item_path(item.quote, item),
+            method: :delete,
+            class: "icon-button icon-button--danger",
+            form_class: "icon-button__form",
+            data: { turbo_confirm: t("quotes.items.destroy_confirm") },
+            aria: { label: t("quotes.items.destroy") } do %>
+        <%= trash_icon %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

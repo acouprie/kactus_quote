@@ -1,0 +1,17 @@
+<% if @item.persisted? %>
+  <%= turbo_stream.append "quote_items" do %>
+    <%= render "quotes/items/item_row", item: @item, line: @totals.lines.find { |line| line.item == @item } %>
+  <% end %>
+
+  <%= turbo_stream.replace "new_item" do %>
+    <%= render "quotes/items/new_item_frame", quote: @quote, item: @quote.quote_items.new %>
+  <% end %>
+
+  <%= turbo_stream.replace "quote_totals" do %>
+    <%= render "quotes/totals", totals: @totals %>
+  <% end %>
+<% else %>
+  <%= turbo_stream.replace "new_item" do %>
+    <%= render "quotes/items/new_item_frame", quote: @quote, item: @item %>
+  <% end %>
+<% end %>

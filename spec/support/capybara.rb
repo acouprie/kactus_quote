@@ -1,6 +1,10 @@
 require "capybara/rspec"
 require "socket"
 
+# Several action icons (item validate, cancel, edit, destroy) carry no visible
+# text, only an aria-label, so button/link locators need to match on it.
+Capybara.enable_aria_label = true
+
 # System specs run inside the "web" container, driven from the "selenium"
 # container. Capybara must listen on all interfaces and advertise this
 # container's own network address so Selenium can reach it back; the "web"
