@@ -46,7 +46,7 @@ fr:
               blank: "ne peut pas être vide"
 
   quotes:
-    title: "Devis"
+    title: "Mes devis"
     table:
       id: "ID"
       date: "Date"

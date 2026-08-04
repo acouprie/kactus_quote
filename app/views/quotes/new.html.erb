@@ -1,4 +1,5 @@
 <%= turbo_frame_tag "new_quote",
+      class: "new-quote-frame",
       data: { controller: "inline-form", inline_form_trigger_value: new_quote_trigger_link } do %>
   <%= render "form", quote: @quote %>
 <% end %>

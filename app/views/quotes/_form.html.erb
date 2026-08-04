@@ -1,15 +1,18 @@
 <%= form_with model: quote, data: { turbo_frame: "_top" } do |form| %>
   <% if quote.errors.any? %>
-    <ul>
+    <ul class="inline-form__errors">
       <% quote.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
     </ul>
   <% end %>
 
-  <%= form.text_field :name,
-        placeholder: t("quotes.form.name_placeholder"),
-        data: { action: "keydown.esc->inline-form#cancel" } %>
-  <%= form.submit t("quotes.form.submit") %>
-  <button type="button" data-action="click->inline-form#cancel"><%= t("quotes.form.cancel") %></button>
+  <div class="inline-form__row">
+    <%= form.text_field :name,
+          class: "input",
+          placeholder: t("quotes.form.name_placeholder"),
+          data: { action: "keydown.esc->inline-form#cancel" } %>
+    <%= form.submit t("quotes.form.submit"), class: "button button--primary" %>
+    <button type="button" class="button" data-action="click->inline-form#cancel"><%= t("quotes.form.cancel") %></button>
+  </div>
 <% end %>
