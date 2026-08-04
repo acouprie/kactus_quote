@@ -2,6 +2,12 @@
 
 A Rails 7 application, running fully in Docker.
 
+## Documentation
+
+See [docs/architecture.md](docs/architecture.md) for the architecture and design decisions.
+See [docs/logbook.md](docs/logbook.md) for the logbook of development notes and ideas.
+See [docs/version_changes.md](docs/version_changes.md) for the version changes log.
+
 ## Stack
 
 * Ruby 3.3.12
@@ -94,6 +100,17 @@ pull request:
 Brakeman's `EOLRails` check is disabled in `config/brakeman.yml`. Rails 7.2 security
 support ends 2026-08-09; this app is a short-lived technical test PoC, not something
 running long-term in production, so that check adds noise without value here.
+
+## Definition of Done
+
+Reusing Kactus's own process vocabulary (success criteria set together, breakdown into deliverable increments, a "done" covering tests, UX, and tracking), a story is considered done when:
+
+- Behaviour matches the functional requirement and the Figma, including the edge cases and assumptions documented in this logbook (e.g. immutability of a validated quote and its items).
+- Tests cover the new or changed code, and the full suite is green, locally and in CI.
+- Rubocop passes with no exceptions, or any exception is explicitly justified.
+- The change has been reviewed, here by Claude Code acting as PR reviewer, with raised issues addressed or consciously logged as known debt.
+- Any new assumption, trade-off, or open question is recorded in this logbook rather than left implicit in the code.
+- The branch is merged to main via a short, focused PR, and the corresponding card is moved on the Kanban board.
 
 ## Deployment
 
