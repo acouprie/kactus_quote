@@ -65,8 +65,7 @@ scale". The first four are the items from "Deliberately kept simple".
 
 **Process**
 
-1. Deployment of the application, absent here since the exercise is delivered as a repository. The
-   groundwork (env-based configuration, `Procfile`) is already in place.
+1. Deployment of the application, absent here since the exercise is delivered as a repository.
 2. Feature flags, to ship an incomplete feature behind a toggle rather than blocking a release.
 3. A defined rollout plan (staged release, canary) instead of a single big-bang deploy.
 4. What I would ask the team to check manually before a release, on top of the automated suite: the

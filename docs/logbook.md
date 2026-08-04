@@ -1,4 +1,4 @@
-e# Kactus - Quote System
+# Kactus - Quote System
 
 I will write in this file all the notes I take while implementing the exercise, to document my
 reasoning and choices.

@@ -190,6 +190,4 @@ increments, a "done" covering tests, UX and tracking), a story is done when:
 
 ## Deployment
 
-Out of scope for this exercise. The groundwork is in place nonetheless: all configuration comes from
-environment variables, no credential is hardcoded, and a `Procfile` declares the web process and the
-release-time migration step.
+Out of scope for this exercise.

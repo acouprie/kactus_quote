@@ -135,7 +135,7 @@ stateDiagram-v2
     draft --> draft : add, edit or delete an item
     draft --> draft : validation refused, quote has no item (422)
     draft --> [*] : delete quote
-    draft --> validated : POST /quotes/:quote_id/validation<br/>guard: at least one item
+    draft --> validated : POST /quotes/{quote_id}/validation<br/>guard - at least one item
 
     note right of draft
         Every mutation is allowed here.
