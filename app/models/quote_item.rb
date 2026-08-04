@@ -4,6 +4,9 @@ class QuoteItem < ApplicationRecord
 
   belongs_to :quote
 
+  before_save :raise_if_quote_validated_in_database
+  before_destroy :raise_if_quote_validated_in_database
+
   validates :name, presence: true
   validates :quantity, numericality: { greater_than: 0, less_than_or_equal_to: MAX_INPUT_VALUE }
   validates :unit_price_excl_vat,
@@ -22,6 +25,12 @@ class QuoteItem < ApplicationRecord
   end
 
   private
+
+  # Asks the parent quote on every write, so this holds even for an item saved or destroyed
+  # without going through Quotes::ItemsController.
+  def raise_if_quote_validated_in_database
+    raise Quote::ImmutableError if quote.validated_in_database?
+  end
 
   def normalize_decimal_separator(value)
     return value unless value.is_a?(String)

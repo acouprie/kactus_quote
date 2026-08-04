@@ -7,6 +7,12 @@
     <span class="badge badge--validated"><%= t("quotes.quote_screen.validated_badge") %></span>
   </div>
 
+  <% if flash[:alert] %>
+    <ul class="inline-form__errors">
+      <li><%= flash[:alert] %></li>
+    </ul>
+  <% end %>
+
   <%= render "items_table", quote: quote, totals: totals %>
   <%= render "totals", totals: totals %>
 </div>

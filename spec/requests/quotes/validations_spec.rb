@@ -39,6 +39,22 @@ RSpec.describe "Quotes::Validations", type: :request do
         expect(quote.reload).to be_draft
       end
     end
+
+    context "when the quote is already validated" do
+      it "refuses a second validation, redirecting to the quote screen with a 303 and a flash" do
+        quote = create(:quote, status: :draft)
+        create(:quote_item, quote: quote)
+        quote.finalize!
+        original_validated_at = quote.validated_at
+
+        post quote_validation_path(quote)
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quote_path(quote))
+        expect(quote.reload.validated_at).to eq(original_validated_at)
+        expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
+      end
+    end
   end
 
   describe "GET /quotes/:id, draft screen validate button" do

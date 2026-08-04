@@ -56,5 +56,38 @@ RSpec.describe Quote, type: :model do
 
       expect(quote.update(name: "Nouveau nom")).to be(true)
     end
+
+    it "refuses to finalize a quote already validated in the database" do
+      quote = create(:quote, status: :draft)
+      create(:quote_item, quote: quote)
+      quote.finalize!
+
+      expect { quote.finalize! }.to raise_error(Quote::ImmutableError)
+    end
+  end
+
+  describe "immutability once validated" do
+    it "refuses to update a quote already validated in the database" do
+      quote = create(:quote, name: "Ancien nom", status: :validated, validated_at: Time.current)
+
+      expect { quote.update(name: "Nouveau nom") }.to raise_error(Quote::ImmutableError)
+      expect(quote.reload.name).to eq("Ancien nom")
+    end
+
+    it "refuses to destroy a quote already validated in the database" do
+      quote = create(:quote, status: :validated, validated_at: Time.current)
+
+      expect { quote.destroy }.to raise_error(Quote::ImmutableError)
+      expect(Quote.exists?(quote.id)).to be(true)
+    end
+
+    it "reads the persisted status rather than the in-memory one, so the draft-to-validated " \
+       "transition does not refuse itself" do
+      quote = create(:quote, status: :draft)
+      quote.status = :validated
+
+      expect { quote.update(name: "Nouveau nom") }.not_to raise_error
+      expect(quote.reload.name).to eq("Nouveau nom")
+    end
   end
 end
