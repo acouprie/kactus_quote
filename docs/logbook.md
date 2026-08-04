@@ -61,7 +61,7 @@ I also use AI-powered autocompletion (Mistral AI) in my IDE to speed up writing 
 
 ### Implementation choices
 
-I choosed to use Rails 7 as it is the version used by Kactus teams, with the lasst version of Ruby (3.3.12). I use Hotwire (Turbo + Stimulus) to implement the dynamic behaviour of the quote items table, as it allows a smooth user experience without full page reloads.
+I choosed to use Rails 7 as it is the version used by Kactus teams, with the lasst version of Ruby (4.0.5). I use Hotwire (Turbo + Stimulus) to implement the dynamic behaviour of the quote items table, as it allows a smooth user experience without full page reloads.
 
 I use Postgresl as the database, as it is mentionned in the job description, and this is the database system I am the most confortable with.
 
@@ -179,4 +179,3 @@ _[Add one subsection per story as it's implemented: assumptions made, edge cases
 ## Retrospective
 
 _[Suggested addition: a short wrap-up once the exercise is done, what went well, what you'd do differently, what took longer than expected.]_
-

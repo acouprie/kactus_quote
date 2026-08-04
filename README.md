@@ -10,7 +10,7 @@ See [docs/version_changes.md](docs/version_changes.md) for the version changes l
 
 ## Stack
 
-* Ruby 3.3.12
+* Ruby 4.0.5
 * Rails 7.2
 * PostgreSQL 16
 * RSpec, FactoryBot, Shoulda Matchers for testing
