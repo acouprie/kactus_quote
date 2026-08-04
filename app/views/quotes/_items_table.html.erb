@@ -7,18 +7,34 @@
       <th><%= t("quotes.quote_screen.table.vat_rate") %></th>
       <th><%= t("quotes.quote_screen.table.total_net") %></th>
       <th><%= t("quotes.quote_screen.table.total_gross") %></th>
+      <% if quote.draft? %>
+        <th></th>
+      <% end %>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="quote_items">
     <% totals.lines.each do |line| %>
-      <tr>
-        <td><%= line.item.name %></td>
-        <td><%= number_with_precision(line.item.quantity, strip_insignificant_zeros: true) %></td>
-        <td><%= number_to_currency(line.item.unit_price_excl_vat) %></td>
-        <td><%= number_to_percentage(line.item.vat_rate) %></td>
-        <td><%= number_to_currency(line.line_net_amount) %></td>
-        <td><%= number_to_currency(line.line_gross_amount) %></td>
-      </tr>
+      <% if quote.draft? %>
+        <%= render "quotes/items/item_row", item: line.item, line: line %>
+      <% else %>
+        <tr>
+          <td><%= line.item.name %></td>
+          <td><%= number_with_precision(line.item.quantity, strip_insignificant_zeros: true) %></td>
+          <td><%= number_to_currency(line.item.unit_price_excl_vat) %></td>
+          <td><%= number_to_percentage(line.item.vat_rate) %></td>
+          <td><%= number_to_currency(line.line_net_amount) %></td>
+          <td><%= number_to_currency(line.line_gross_amount) %></td>
+        </tr>
+      <% end %>
     <% end %>
   </tbody>
+  <% if quote.draft? %>
+    <tfoot>
+      <tr>
+        <td colspan="7" class="items-table__new-row">
+          <%= render "quotes/items/new_item_frame", quote: quote, item: nil %>
+        </td>
+      </tr>
+    </tfoot>
+  <% end %>
 </table>

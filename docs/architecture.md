@@ -223,9 +223,10 @@ sequenceDiagram
 Editing an item follows the same shape, with `PATCH /quotes/{quote_id}/items/{id}` and a `replace`
 on the existing row instead of an `append`. Deleting follows it with a `remove` on the row.
 
-One point to confirm against Turbo's real behaviour rather than assume, and to correct here once
-tested: whether the success status should be 200 or 201 for a stream body. The immutability branch
-deliberately avoids the question by redirecting, see the logbook under "Deliberately kept simple".
+A stream body answers 200, not 201, on every successful write, create included: the request specs
+assert on it directly and Turbo does not distinguish the two for a stream response, so 200 stays
+uniform across create, update and destroy. The immutability branch avoids the question entirely by
+redirecting instead, see the logbook under "Deliberately kept simple".
 
 **Rounding, in three lines.** Each line's net amount is rounded to two decimals first; lines are
 grouped by VAT rate and each group's VAT is computed once, on that group's summed net amount; the

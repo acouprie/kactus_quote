@@ -1,0 +1,9 @@
+<%= turbo_frame_tag "new_item",
+      class: "new-item-frame",
+      data: { controller: "inline-form", inline_form_trigger_value: new_item_trigger_button(quote) } do %>
+  <% if item %>
+    <%= render "quotes/items/form", quote: quote, item: item, show_cancel: true %>
+  <% else %>
+    <%= new_item_trigger_button(quote) %>
+  <% end %>
+<% end %>

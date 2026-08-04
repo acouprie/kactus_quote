@@ -55,12 +55,31 @@ fr:
     attributes:
       quote:
         name: "Nom"
+      quote_item:
+        name: "Nom"
+        quantity: "Quantité"
+        unit_price_excl_vat: "Prix unitaire HT"
+        vat_rate: "Taux de TVA"
     errors:
       models:
         quote:
           attributes:
             name:
               blank: "ne peut pas être vide"
+        quote_item:
+          attributes:
+            name:
+              blank: "ne peut pas être vide"
+            quantity:
+              not_a_number: "n'est pas un nombre"
+              greater_than: "doit être supérieur à %{count}"
+              less_than_or_equal_to: "doit être inférieur ou égal à %{count}"
+            unit_price_excl_vat:
+              not_a_number: "n'est pas un nombre"
+              greater_than_or_equal_to: "doit être supérieur ou égal à %{count}"
+              less_than_or_equal_to: "doit être inférieur ou égal à %{count}"
+            vat_rate:
+              inclusion: "n'est pas inclus dans la liste"
 
   quotes:
     title: "Mes devis"
@@ -94,3 +113,14 @@ fr:
         net: "Total HT"
         vat: "Total TVA"
         gross: "Total TTC"
+    items:
+      new_item: "Ajouter un article"
+      edit: "Éditer"
+      destroy: "Supprimer"
+      destroy_confirm: "Voulez-vous vraiment supprimer cet article ?"
+      form:
+        name_placeholder: "Nom de l'article"
+        quantity_placeholder: "Quantité"
+        unit_price_placeholder: "Prix unitaire HT"
+        submit: "Valider"
+        cancel: "Annuler"

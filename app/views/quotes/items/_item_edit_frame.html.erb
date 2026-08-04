@@ -1,0 +1,3 @@
+<%= turbo_frame_tag dom_id(item, :frame), class: "items-row-frame" do %>
+  <%= render "quotes/items/form", quote: quote, item: item, show_cancel: false %>
+<% end %>
