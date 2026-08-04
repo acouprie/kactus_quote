@@ -7,9 +7,9 @@ RSpec.describe QuoteTotals do
       totals = described_class.new(quote)
 
       expect(totals.lines).to eq([])
-      expect(totals.total_net_amount).to eq(0)
-      expect(totals.total_vat_amount).to eq(0)
-      expect(totals.total_gross_amount).to eq(0)
+      expect(totals.total_net_amount).to eq(BigDecimal("0"))
+      expect(totals.total_vat_amount).to eq(BigDecimal("0"))
+      expect(totals.total_gross_amount).to eq(BigDecimal("0"))
     end
   end
 
@@ -22,13 +22,13 @@ RSpec.describe QuoteTotals do
       line = totals.lines.sole
 
       expect(line.item).to eq(item)
-      expect(line.line_net_amount).to eq(100)
-      expect(line.line_vat_amount).to eq(20)
-      expect(line.line_gross_amount).to eq(120)
+      expect(line.line_net_amount).to eq(BigDecimal("100"))
+      expect(line.line_vat_amount).to eq(BigDecimal("20"))
+      expect(line.line_gross_amount).to eq(BigDecimal("120"))
 
-      expect(totals.total_net_amount).to eq(100)
-      expect(totals.total_vat_amount).to eq(20)
-      expect(totals.total_gross_amount).to eq(120)
+      expect(totals.total_net_amount).to eq(BigDecimal("100"))
+      expect(totals.total_vat_amount).to eq(BigDecimal("20"))
+      expect(totals.total_gross_amount).to eq(BigDecimal("120"))
     end
   end
 
@@ -40,9 +40,9 @@ RSpec.describe QuoteTotals do
 
       totals = described_class.new(quote)
 
-      expect(totals.lines.map(&:line_vat_amount)).to all(eq(0))
-      expect(totals.lines.map { |line| line.line_gross_amount }).to eq(totals.lines.map(&:line_net_amount))
-      expect(totals.total_vat_amount).to eq(0)
+      expect(totals.lines.map(&:line_vat_amount)).to all(eq(BigDecimal("0")))
+      expect(totals.lines.map(&:line_gross_amount)).to eq(totals.lines.map(&:line_net_amount))
+      expect(totals.total_vat_amount).to eq(BigDecimal("0"))
       expect(totals.total_gross_amount).to eq(totals.total_net_amount)
     end
   end
@@ -52,7 +52,7 @@ RSpec.describe QuoteTotals do
       quote = create(:quote)
       create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 100, vat_rate: 20)
       create(:quote_item, quote: quote, quantity: 3, unit_price_excl_vat: 10, vat_rate: 10)
-      create(:quote_item, quote: quote, quantity: 2, unit_price_excl_vat: 12.5, vat_rate: 5.5)
+      create(:quote_item, quote: quote, quantity: 2, unit_price_excl_vat: "12.5", vat_rate: "5.5")
 
       totals = described_class.new(quote)
 
@@ -67,7 +67,7 @@ RSpec.describe QuoteTotals do
   describe "a rate group where naive per-line rounding would not sum to the group's VAT" do
     it "reconciles the lines to the group's authoritative VAT instead" do
       quote = create(:quote)
-      3.times { create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 0.03, vat_rate: 20) }
+      3.times { create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: "0.03", vat_rate: 20) }
 
       totals = described_class.new(quote)
 
@@ -81,7 +81,7 @@ RSpec.describe QuoteTotals do
   describe "a group where the full k cents have to be distributed" do
     it "allocates one cent to every one of the twelve lines at 5.5 %" do
       quote = create(:quote)
-      12.times { create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 1.09, vat_rate: 5.5) }
+      12.times { create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: "1.09", vat_rate: "5.5") }
 
       totals = described_class.new(quote)
 
@@ -93,8 +93,8 @@ RSpec.describe QuoteTotals do
   describe "a tie on the remainder" do
     it "breaks the tie by item id ascending, deterministically" do
       quote = create(:quote)
-      first_item = create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 0.17, vat_rate: 10)
-      second_item = create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 0.57, vat_rate: 10)
+      first_item = create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: "0.17", vat_rate: 10)
+      second_item = create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: "0.57", vat_rate: 10)
 
       # Both lines have an exact VAT fractional remainder of 0.7 cents, and only
       # one cent is left to distribute after flooring, so the tie-break decides.
