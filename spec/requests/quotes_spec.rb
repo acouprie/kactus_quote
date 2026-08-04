@@ -103,8 +103,11 @@ RSpec.describe "Quotes", type: :request do
 
         get quote_path(quote)
 
-        expect(response.body).to include("1 234,56 €")
-        expect(response.body).to include("5,5 %")
+        # The separators come from rails-i18n's fr locale: U+202F narrow no-break space between
+        # the thousands and before the unit. Written as escapes rather than pasted, so the
+        # assertion survives an editor normalising invisible characters.
+        expect(response.body).to include("1\u{202F}234,56\u{202F}€")
+        expect(response.body).to include("5,5\u{202F}%")
       end
     end
 
@@ -141,6 +144,11 @@ RSpec.describe "Quotes", type: :request do
         quote = create(:quote, name: "Nom initial", status: :draft)
 
         patch quote_path(quote), params: { quote: { name: "" } }
+
+        rendered = Capybara.string(response.body)
+
+        expect(rendered).to have_css("input[name='quote[name]']")
+        expect(rendered).to have_content(I18n.t("activerecord.errors.models.quote.attributes.name.blank"))
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(quote.reload.name).to eq("Nom initial")
