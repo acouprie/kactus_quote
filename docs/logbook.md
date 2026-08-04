@@ -338,8 +338,12 @@ README rather than left implicit:
   the allowed list. These are not Rails' own validations being re-proved, they are the contract that
   makes the money computation safe, and the arithmetic section leans on them explicitly. What is
   _not_ tested is Rails itself.
-- One system test on the full quote flow, with Turbo actually exercised rather than stubbed, since
-  that is the integration risk (multi-target stream updates, 422 and 303 responses, form resets).
+- System specs, driving a real browser, only where the behaviour cannot be observed from a
+  request spec: a redirect out of a Turbo Frame that a request spec reads as a correct 303 while
+  the browser renders "Content missing", focus retention between two submissions, dismissal by
+  the Escape key, and the composition of all of it on the full quote flow. Four in total. The
+  rule is the boundary, not the count: anything a request spec can assert is asserted there,
+  since it is faster and it fails more precisely.
 - Nothing on framework behaviour that no project-specific rule depends on.
 
 Two invariants get their own named specs rather than being checked incidentally inside broader

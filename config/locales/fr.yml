@@ -29,3 +29,35 @@
 
 fr:
   hello: "Bonjour le monde"
+
+  date:
+    formats:
+      default: "%d/%m/%Y"
+
+  activerecord:
+    attributes:
+      quote:
+        name: "Nom"
+    errors:
+      models:
+        quote:
+          attributes:
+            name:
+              blank: "ne peut pas être vide"
+
+  quotes:
+    title: "Mes devis"
+    table:
+      id: "ID"
+      date: "Date"
+      name: "Nom"
+    new_quote: "Ajouter un devis"
+    edit: "Éditer"
+    show: "Voir"
+    destroy: "Supprimer"
+    destroy_confirm: "Voulez-vous vraiment supprimer ce devis ?"
+    back_to_list: "Retour à la liste"
+    form:
+      name_placeholder: "Nom du devis"
+      submit: "Valider"
+      cancel: "Annuler"
