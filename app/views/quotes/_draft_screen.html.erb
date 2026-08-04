@@ -1,6 +1,5 @@
-<%= form_with model: quote, method: :patch, class: "quote-page" do |form| %>
-
-  <div class="card">
+<div class="card">
+  <%= form_with model: quote, method: :patch, class: "quote-page" do |form| %>
     <%= form.button class: "button quote-page__back" do %>
       <%= back_button_content(t("quotes.quote_screen.save_and_exit")) %>
     <% end %>
@@ -16,8 +15,15 @@
         <% end %>
       </ul>
     <% end %>
+  <% end %>
 
-    <%= render "items_table", quote: quote, totals: totals %>
-    <%= render "totals", totals: totals %>
-  </div>
-<% end %>
+  <%= render "flash", quote: quote %>
+  <%= render "items_table", quote: quote, totals: totals %>
+  <%= render "totals", totals: totals %>
+
+  <%= button_to t("quotes.quote_screen.validate"),
+        quote_validation_path(quote),
+        class: "button button--primary",
+        disabled: quote.quote_items.empty?,
+        title: (t("quotes.quote_screen.validate_disabled_title") if quote.quote_items.empty?) %>
+</div>

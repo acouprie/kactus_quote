@@ -66,6 +66,8 @@ fr:
           attributes:
             name:
               blank: "ne peut pas être vide"
+            base:
+              no_item: "Un devis sans article ne peut pas être validé."
         quote_item:
           attributes:
             name:
@@ -102,6 +104,8 @@ fr:
       validated_badge: "Validé"
       save_and_exit: "Enregistrer et quitter"
       exit: "Quitter"
+      validate: "Valider le devis"
+      validate_disabled_title: "Ajoutez au moins un article avant de valider le devis"
       table:
         article: "Article"
         quantity: "Qte"

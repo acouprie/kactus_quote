@@ -1,0 +1,9 @@
+<div id="quote_flash">
+  <% if quote.errors[:base].any? %>
+    <ul class="inline-form__errors">
+      <% quote.errors[:base].each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

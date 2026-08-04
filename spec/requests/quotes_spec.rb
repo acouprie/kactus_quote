@@ -137,6 +137,15 @@ RSpec.describe "Quotes", type: :request do
         expect(response).to redirect_to(quotes_path)
         expect(quote.reload.name).to eq("Nouveau nom")
       end
+
+      it "ignores a status slipped into the parameters" do
+        quote = create(:quote, name: "Nom", status: :draft)
+
+        patch quote_path(quote), params: { quote: { name: "Nom", status: "validated" } }
+
+        expect(quote.reload).to be_draft
+        expect(quote.validated_at).to be_nil
+      end
     end
 
     context "with a blank name" do

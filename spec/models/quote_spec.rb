@@ -29,4 +29,32 @@ RSpec.describe Quote, type: :model do
     expect { quote.destroy }.to change(QuoteItem, :count).by(-1)
     expect { item.reload }.to raise_error(ActiveRecord::RecordNotFound)
   end
+
+  describe "#finalize!" do
+    it "sets the quote validated with a validation timestamp when it has at least one item" do
+      quote = create(:quote, status: :draft)
+      create(:quote_item, quote: quote)
+
+      quote.finalize!
+
+      expect(quote).to be_validated
+      expect(quote.validated_at).to be_present
+    end
+
+    it "refuses a quote with no item, leaving it a draft in the database" do
+      quote = create(:quote, status: :draft)
+
+      quote.finalize!
+
+      expect(quote.errors[:base]).to be_present
+      expect(quote.reload).to be_draft
+      expect(quote.validated_at).to be_nil
+    end
+
+    it "does not run the no-item check on an ordinary save" do
+      quote = create(:quote, status: :draft)
+
+      expect(quote.update(name: "Nouveau nom")).to be(true)
+    end
+  end
 end

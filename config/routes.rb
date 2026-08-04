@@ -10,5 +10,6 @@ Rails.application.routes.draw do
 
   resources :quotes, except: :edit do
     resources :items, only: %i[new create edit update destroy], module: :quotes
+    resource :validation, only: :create, module: :quotes
   end
 end
