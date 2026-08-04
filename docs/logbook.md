@@ -259,17 +259,21 @@ one this project performs on every line.
 
 Columns and bounds:
 
-- `unit_price_excl_vat` is `decimal(12, 2)`, zero or positive, mapped to `BigDecimal` in Ruby.
-- `quantity` is `decimal(10, 2)`, strictly positive. Two decimals cover realistic fractional units
-  (half-days, quarter-hours, square metres) without inviting precision that means nothing
-  commercially.
+- `unit_price_excl_vat` and `quantity` are both `decimal(10, 2)`, mapped to `BigDecimal` in Ruby.
+  `unit_price_excl_vat` is zero or positive; `quantity` is strictly positive, with two decimals
+  covering realistic fractional units (half-days, quarter-hours, square metres) without inviting
+  precision that means nothing commercially. The two columns share the same precision because the
+  same application bound (99 999.99, below) already caps them identically: giving either one more
+  room in the column would add headroom nothing in the app is allowed to use.
 - `vat_rate` is `decimal(5, 2)`, not an integer, since 5.5 is one of the allowed values. The allowed
   list is enforced by a model validation.
-- Both user inputs are capped at 99 999.99. `unit_price_excl_vat` needs the cap because a larger
-  value does not fit its column and PostgreSQL answers `numeric_value_out_of_range`, which surfaces
-  as a 500 rather than as a form error; `quantity` gets the same cap for input sanity. The bound is
-  commercially absurd for an events quote, which is the point: it exists so that the failure mode is
-  a form error and never a stack trace.
+- Both user inputs are capped at 99 999.99. That bound is not dictated by the column: `decimal(10,
+  2)` holds values up to 99 999 999.99, far above it. The cap is deliberately set well inside that
+  range, commercially absurd for an events quote, so that the failure mode for any value a user
+  could plausibly type is a form error, never a database exception. Without it, a value large
+  enough to actually exceed the column would still make PostgreSQL answer
+  `numeric_value_out_of_range`, surfacing as a 500 instead of a form error; setting the bound far
+  inside the column's range is precisely what keeps that case from ever being reached.
 
 Input parsing, which is where the two subtle bugs are:
 

@@ -91,7 +91,7 @@ erDiagram
         bigint quote_id FK "not null, indexed"
         string name "not null"
         decimal quantity "precision 10 scale 2, strictly positive, max 99999.99"
-        decimal unit_price_excl_vat "precision 12 scale 2, zero or positive, max 99999.99"
+        decimal unit_price_excl_vat "precision 10 scale 2, zero or positive, max 99999.99"
         decimal vat_rate "precision 5 scale 2, in 0, 5.5, 10, 20"
         datetime created_at
         datetime updated_at
