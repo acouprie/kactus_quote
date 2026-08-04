@@ -75,7 +75,8 @@ RSpec.describe QuoteTotals do
       expect(totals.lines.map(&:line_vat_amount)).to all(eq(BigDecimal("0")))
       expect(totals.lines.map(&:line_gross_amount)).to eq(totals.lines.map(&:line_net_amount))
       expect(totals.total_vat_amount).to eq(BigDecimal("0"))
-      expect(totals.total_gross_amount).to eq(totals.total_net_amount)
+      expect(totals.total_net_amount).to eq(BigDecimal("75"))
+      expect(totals.total_gross_amount).to eq(BigDecimal("75"))
     end
   end
 
@@ -90,14 +91,17 @@ RSpec.describe QuoteTotals do
 
     it_behaves_like "consistent quote totals"
 
-    it "satisfies both invariants: gross = net + vat, and lines sum to totals column by column" do
+    it "computes each rate group on its own base and aggregates them" do
       totals = described_class.new(quote)
 
-      expect(totals.total_gross_amount).to eq(totals.total_net_amount + totals.total_vat_amount)
+      # 20 % on 100.00 gives 20.00, 10 % on 30.00 gives 3.00, and 5.5 % on 25.00 gives
+      # 1.375, rounded half-up to 1.38.
+      expect(totals.lines.map(&:line_vat_amount))
+        .to eq([ BigDecimal("20"), BigDecimal("3"), BigDecimal("1.38") ])
 
-      expect(totals.lines.sum(&:line_net_amount)).to eq(totals.total_net_amount)
-      expect(totals.lines.sum(&:line_vat_amount)).to eq(totals.total_vat_amount)
-      expect(totals.lines.sum(&:line_gross_amount)).to eq(totals.total_gross_amount)
+      expect(totals.total_net_amount).to eq(BigDecimal("155"))
+      expect(totals.total_vat_amount).to eq(BigDecimal("24.38"))
+      expect(totals.total_gross_amount).to eq(BigDecimal("179.38"))
     end
   end
 
@@ -116,7 +120,8 @@ RSpec.describe QuoteTotals do
       # Naive per-line rounding: round(0.03 * 0.20, 2) = 0.01, three times, sums to 0.03.
       # Authoritative group VAT: round(0.09 * 0.20, 2) = 0.02.
       expect(totals.total_vat_amount).to eq(BigDecimal("0.02"))
-      expect(totals.lines.sum(&:line_vat_amount)).to eq(BigDecimal("0.02"))
+      expect(totals.lines.map(&:line_vat_amount))
+        .to eq([ BigDecimal("0.01"), BigDecimal("0.01"), BigDecimal("0") ])
     end
   end
 
