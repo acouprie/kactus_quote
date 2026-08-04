@@ -31,6 +31,8 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(rendered).to have_css("turbo-stream[action='replace'][target='new_item']")
         expect(rendered).to have_css("turbo-stream[action='replace'][target='quote_totals']")
         expect(response.body).to include(item.name)
+
+        expect(response.body).to include("360,00\u{202F}€")
       end
 
       it "reads a French decimal separator on quantity and unit price" do
@@ -58,7 +60,7 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(rendered).to have_css("turbo-stream[action='replace'][target='new_item']")
         expect(rendered).to have_no_css("turbo-stream[action='append']")
         expect(rendered).to have_no_css("turbo-stream[action='replace'][target='quote_totals']")
-        expect(response.body).to include("ne peut pas être vide")
+        expect(response.body).to include('class="inline-form__errors"')
         expect(response.body).to include(%(name="quote_item[name]"))
       end
     end

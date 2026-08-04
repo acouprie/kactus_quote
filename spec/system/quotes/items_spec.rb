@@ -11,12 +11,14 @@ RSpec.describe "Quote screen, item table", type: :system do
       fill_in "quote_item_name", with: "Article #{n + 1}"
       fill_in "quote_item_quantity", with: "1"
       fill_in "quote_item_unit_price_excl_vat", with: "100"
-      find("#quote_item_vat_rate option[value='20.0']").select_option
+      select "20\u{202F}%", from: "quote_item_vat_rate"
       click_button "Valider"
 
       expect(page).to have_content("Article #{n + 1}")
+      expect(page).to have_css("#quote_item_name:focus")
+
       within "#quote_totals" do
-        expect(page).to have_content(ApplicationController.helpers.number_to_currency((n + 1) * 100))
+        expect(page).to have_content("#{(n + 1) * 120},00\u{202F}€")
       end
     end
 
