@@ -54,11 +54,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      selenium:
+        image: selenium/standalone-chromium
+        ports: [ "4444:4444" ]
+        options: >-
+          --shm-size=2g
+          --health-cmd "curl -sf http://localhost:4444/wd/hub/status || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+
     env:
       RAILS_ENV: test
       DATABASE_HOST: localhost
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      SELENIUM_URL: http://localhost:4444
 
     steps:
       - name: Checkout code

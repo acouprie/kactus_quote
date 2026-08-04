@@ -38,5 +38,9 @@ module App
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # The application is monolingual French, with no locale switcher.
+    config.i18n.default_locale = :fr
+    config.i18n.available_locales = [ :fr ]
   end
 end
