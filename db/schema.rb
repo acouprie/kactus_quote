@@ -10,8 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 0) do
+ActiveRecord::Schema[7.2].define(version: 2026_08_04_143416) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "quote_items", force: :cascade do |t|
+    t.bigint "quote_id", null: false
+    t.string "name", null: false
+    t.decimal "quantity", precision: 10, scale: 2, null: false
+    t.decimal "unit_price_excl_vat", precision: 10, scale: 2, null: false
+    t.decimal "vat_rate", precision: 5, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quote_id"], name: "index_quote_items_on_quote_id"
+  end
+
+  create_table "quotes", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "validated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "quote_items", "quotes"
 end
