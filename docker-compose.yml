@@ -7,6 +7,24 @@ services:
       - .env
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  selenium:
+    image: selenium/standalone-chromium:4.27.0
+    shm_size: 2gb
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -sSf http://localhost:4444/status | grep -qE '"ready"\s*:\s*true'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
 
   web:
     build: .
@@ -18,7 +36,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      selenium:
+        condition: service_healthy
     stdin_open: true
     tty: true
 

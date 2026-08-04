@@ -54,6 +54,12 @@ end
 group :test do
   # Extra RSpec matchers for common Rails functionality
   gem "shoulda-matchers"
+
+  # Acceptance test framework [https://github.com/teamcapybara/capybara]
+  gem "capybara"
+
+  # Drives system tests through a remote Selenium grid
+  gem "selenium-webdriver"
 end
 
 group :development do

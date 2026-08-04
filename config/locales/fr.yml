@@ -27,5 +27,5 @@
 #       "yes": yup
 #       enabled: "ON"
 
-en:
-  hello: "Hello world"
+fr:
+  hello: "Bonjour le monde"
