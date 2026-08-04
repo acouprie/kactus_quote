@@ -169,3 +169,126 @@ turbo-frame {
   font-size: 0.95rem;
   color: var(--color-ink);
 }
+
+.quote-page__back {
+  display: inline-flex;
+  margin-bottom: 1rem;
+}
+
+.quote-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.quote-header__name {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.quote-header__name-input {
+  width: 80%;
+  padding: 0.25rem 0.4rem;
+  margin-left: -0.4rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.quote-header__name-input:focus {
+  outline: none;
+  border-color: var(--color-border);
+  background: var(--color-header-bg);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge--draft {
+  background: #e9e2ff;
+  color: #a688fe;
+}
+
+.badge--validated {
+  background: #d2f0a8;
+  color: #6a9c2e;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.items-table th {
+  background: var(--color-header-bg);
+  color: var(--color-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+.items-table th:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+
+.items-table th:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.items-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-ink);
+  font-size: 0.95rem;
+}
+
+.totals {
+  margin: 0;
+  margin-left: auto;
+  width: max-content;
+  min-width: 260px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  background: var(--color-surface);
+}
+
+.totals__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0.35rem 0;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.totals__row dt,
+.totals__row dd {
+  margin: 0;
+}
+
+.totals__row--vat {
+  color: var(--color-muted);
+}
+
+.totals__row--gross {
+  margin-top: 0.25rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}

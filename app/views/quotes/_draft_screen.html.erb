@@ -1,0 +1,23 @@
+<%= form_with model: quote, method: :patch, class: "quote-page" do |form| %>
+
+  <div class="card">
+    <%= form.button class: "button quote-page__back" do %>
+      <%= back_button_content(t("quotes.quote_screen.save_and_exit")) %>
+    <% end %>
+    <div class="quote-header">
+      <%= form.text_field :name, class: "quote-header__name-input" %>
+      <span class="badge badge--draft"><%= t("quotes.quote_screen.draft_badge") %></span>
+    </div>
+
+    <% if quote.errors.any? %>
+      <ul class="inline-form__errors">
+        <% quote.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%= render "items_table", totals: totals %>
+    <%= render "totals", totals: totals %>
+  </div>
+<% end %>

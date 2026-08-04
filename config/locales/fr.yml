@@ -34,6 +34,23 @@ fr:
     formats:
       default: "%d/%m/%Y"
 
+  number:
+    format:
+      separator: ","
+      delimiter: " "
+      precision: 2
+    currency:
+      format:
+        unit: "€"
+        format: "%n %u"
+        separator: ","
+        delimiter: " "
+        precision: 2
+    percentage:
+      format:
+        format: "%n %"
+        strip_insignificant_zeros: true
+
   activerecord:
     attributes:
       quote:
@@ -61,3 +78,19 @@ fr:
       name_placeholder: "Nom du devis"
       submit: "Valider"
       cancel: "Annuler"
+    quote_screen:
+      draft_badge: "En cours d'édition"
+      validated_badge: "Validé"
+      save_and_exit: "Enregistrer et quitter"
+      exit: "Quitter"
+      table:
+        article: "Article"
+        quantity: "Qte"
+        unit_price: "PU HT"
+        vat_rate: "TVA"
+        total_net: "Total HT"
+        total_gross: "Total TTC"
+      totals:
+        net: "Total HT"
+        vat: "Total TVA"
+        gross: "Total TTC"

@@ -1,0 +1,24 @@
+<table class="items-table">
+  <thead>
+    <tr>
+      <th><%= t("quotes.quote_screen.table.article") %></th>
+      <th><%= t("quotes.quote_screen.table.quantity") %></th>
+      <th><%= t("quotes.quote_screen.table.unit_price") %></th>
+      <th><%= t("quotes.quote_screen.table.vat_rate") %></th>
+      <th><%= t("quotes.quote_screen.table.total_net") %></th>
+      <th><%= t("quotes.quote_screen.table.total_gross") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% totals.lines.each do |line| %>
+      <tr>
+        <td><%= line.item.name %></td>
+        <td><%= number_with_precision(line.item.quantity, strip_insignificant_zeros: true) %></td>
+        <td><%= number_to_currency(line.item.unit_price_excl_vat) %></td>
+        <td><%= number_to_percentage(line.item.vat_rate) %></td>
+        <td><%= number_to_currency(line.line_net_amount) %></td>
+        <td><%= number_to_currency(line.line_gross_amount) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
