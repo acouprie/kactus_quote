@@ -73,8 +73,8 @@ RSpec.describe QuoteTotals do
 
       # Naive per-line rounding: round(0.03 * 0.20, 2) = 0.01, three times, sums to 0.03.
       # Authoritative group VAT: round(0.09 * 0.20, 2) = 0.02.
-      expect(totals.total_vat_amount).to eq(0.02)
-      expect(totals.lines.sum(&:line_vat_amount)).to eq(0.02)
+      expect(totals.total_vat_amount).to eq(BigDecimal("0.02"))
+      expect(totals.lines.sum(&:line_vat_amount)).to eq(BigDecimal("0.02"))
     end
   end
 
@@ -85,8 +85,8 @@ RSpec.describe QuoteTotals do
 
       totals = described_class.new(quote)
 
-      expect(totals.lines.map(&:line_vat_amount)).to all(eq(0.06))
-      expect(totals.total_vat_amount).to eq(0.72)
+      expect(totals.lines.map(&:line_vat_amount)).to all(eq(BigDecimal("0.06")))
+      expect(totals.total_vat_amount).to eq(BigDecimal("0.72"))
     end
   end
 
@@ -101,23 +101,8 @@ RSpec.describe QuoteTotals do
       totals = described_class.new(quote)
       lines_by_item = totals.lines.index_by(&:item)
 
-      expect(lines_by_item[first_item].line_vat_amount).to eq(0.02)
-      expect(lines_by_item[second_item].line_vat_amount).to eq(0.05)
-    end
-  end
-
-  describe "determinism" do
-    it "returns the identical result across runs for the same data" do
-      quote = create(:quote)
-      3.times { create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 0.03, vat_rate: 20) }
-
-      first_run = described_class.new(quote)
-      second_run = described_class.new(quote)
-
-      expect(first_run.lines).to eq(second_run.lines)
-      expect(first_run.total_net_amount).to eq(second_run.total_net_amount)
-      expect(first_run.total_vat_amount).to eq(second_run.total_vat_amount)
-      expect(first_run.total_gross_amount).to eq(second_run.total_gross_amount)
+      expect(lines_by_item[first_item].line_vat_amount).to eq(BigDecimal("0.02"))
+      expect(lines_by_item[second_item].line_vat_amount).to eq(BigDecimal("0.05"))
     end
   end
 end

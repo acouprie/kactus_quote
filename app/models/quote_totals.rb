@@ -38,10 +38,12 @@ class QuoteTotals
     items = quote.quote_items.to_a
     net_amounts = items.each_with_object({}) { |item, amounts| amounts[item] = line_net_amount_for(item) }
     lines_by_item = {}
+    group_vat_amounts = []
 
     items.group_by(&:vat_rate).each do |rate, group_items|
       group_net_subtotal = group_items.sum(ZERO) { |item| net_amounts[item] }
       group_vat_amount = round_half_up(group_net_subtotal * rate / 100)
+      group_vat_amounts << group_vat_amount
 
       allocate_group_vat(group_items, net_amounts, group_vat_amount).each do |item, line_vat_amount|
         lines_by_item[item] = Line.new(
@@ -55,7 +57,7 @@ class QuoteTotals
 
     @lines = items.map { |item| lines_by_item.fetch(item) }
     @total_net_amount = items.sum(ZERO) { |item| net_amounts[item] }
-    @total_vat_amount = lines_by_item.values.sum(ZERO, &:line_vat_amount)
+    @total_vat_amount = group_vat_amounts.sum(ZERO)
     @total_gross_amount = @total_net_amount + @total_vat_amount
   end
 
