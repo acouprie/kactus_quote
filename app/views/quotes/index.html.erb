@@ -1,0 +1,29 @@
+<% content_for :title, t("quotes.title") %>
+
+<h1><%= t("quotes.title") %></h1>
+
+<table>
+  <thead>
+    <tr>
+      <th><%= t("quotes.table.id") %></th>
+      <th><%= t("quotes.table.date") %></th>
+      <th><%= t("quotes.table.name") %></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="quotes">
+    <%= render @quotes %>
+    <tr>
+      <td colspan="4">
+        <%= turbo_frame_tag "new_quote",
+              data: { controller: "inline-form", inline_form_trigger_value: new_quote_trigger_link } do %>
+          <% if @quote %>
+            <%= render "form", quote: @quote %>
+          <% else %>
+            <%= new_quote_trigger_link %>
+          <% end %>
+        <% end %>
+      </td>
+    </tr>
+  </tbody>
+</table>
