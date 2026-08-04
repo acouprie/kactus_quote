@@ -1,0 +1,32 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this pull request diff. Focus on:
+            - Design: is the code well structured, are responsibilities clear?
+            - Readability: naming, clarity, idiomatic Ruby style
+            - Performance: any obvious inefficiencies
+            - Security: input validation, unsafe patterns
+            - Testability: test coverage for the changes, edge cases missed
+
+            Post findings as inline comments on the relevant lines. Keep feedback concise and actionable.
