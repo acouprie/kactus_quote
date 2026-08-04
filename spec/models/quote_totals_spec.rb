@@ -137,6 +137,9 @@ RSpec.describe QuoteTotals do
     it "allocates one cent to every one of the twelve lines at 5.5 %" do
       totals = described_class.new(quote)
 
+      # Each line's exact VAT is 5.995 cents, so every floor discards almost a full cent and
+      # all twelve have to be given back. At 20 % the remainder never exceeds 0.8 cents and
+      # this upper bound would not be reachable, so the rate is part of the test.
       expect(totals.lines.map(&:line_vat_amount)).to all(eq(BigDecimal("0.06")))
       expect(totals.total_vat_amount).to eq(BigDecimal("0.72"))
     end
@@ -154,13 +157,52 @@ RSpec.describe QuoteTotals do
     it_behaves_like "consistent quote totals"
 
     it "breaks the tie by item id ascending, deterministically" do
-      # Both lines have an exact VAT fractional remainder of 0.7 cents, and only
-      # one cent is left to distribute after flooring, so the tie-break decides.
+      # Both lines have an exact VAT fractional remainder of 0.7 cents, and only one cent is
+      # left to distribute after flooring, so the tie-break is what decides the outcome. The
+      # id is the only ordering the allocation depends on, which is what makes the result
+      # reproducible across runs.
       totals = described_class.new(quote)
       lines_by_item = totals.lines.index_by(&:item)
 
       expect(lines_by_item[first_item].line_vat_amount).to eq(BigDecimal("0.02"))
       expect(lines_by_item[second_item].line_vat_amount).to eq(BigDecimal("0.05"))
+    end
+  end
+
+  describe "the rounding mode" do
+    # Every rounding in QuoteTotals passes ROUND_HALF_UP explicitly. These two scenarios are
+    # the only ones in the file whose amounts land exactly on half a cent, so they are the
+    # only ones that would fail if the mode were left implicit and a future contributor
+    # switched the process to banker's rounding.
+
+    context "on a line's net amount" do
+      let(:quote) { create(:quote) }
+
+      before do
+        create(:quote_item, quote: quote, quantity: "1.5", unit_price_excl_vat: "2.43", vat_rate: 20)
+      end
+
+      it_behaves_like "consistent quote totals"
+
+      it "rounds half-up rather than half-even" do
+        # 1.5 x 2.43 = 3.645 exactly. Half-up gives 3.65, banker's rounding gives 3.64.
+        expect(described_class.new(quote).total_net_amount).to eq(BigDecimal("3.65"))
+      end
+    end
+
+    context "on a rate group's VAT" do
+      let(:quote) { create(:quote) }
+
+      before do
+        create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: "13.65", vat_rate: 10)
+      end
+
+      it_behaves_like "consistent quote totals"
+
+      it "rounds half-up rather than half-even" do
+        # 13.65 x 10 / 100 = 1.365 exactly. Half-up gives 1.37, banker's rounding gives 1.36.
+        expect(described_class.new(quote).total_vat_amount).to eq(BigDecimal("1.37"))
+      end
     end
   end
 end
