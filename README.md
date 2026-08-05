@@ -44,6 +44,7 @@ Seven decisions shape most of the code. Each one links to the reasoning behind i
   brief, in three axes: product, technical and process.
 - [Kanban board](https://github.com/users/acouprie/projects/1/views/1)
 - [Figma](https://www.figma.com/design/jiNniIBnQWBxUOJzt6Ihbu/Test-technique)
+- See my retrospective on the exercise in [here](docs/logbook.md#retrospective).
 
 ## Stack
 
