@@ -606,8 +606,15 @@ Stream flash rather than a full page error.
 
 #### Turbo and Stimulus specifics
 
-- An action on an item updates two zones, the item's row and the totals block. Handled with a
-  multi-target Turbo Stream response, targets named via `dom_id`.
+- An action on an item updates three zones, the table body, the totals block and the validate
+  button. Handled with a multi-target Turbo Stream response, targets named via `dom_id`.
+- The table body is re-rendered whole on every item write, rather than appending, replacing or
+  removing the single row that was touched. The cent allocation runs per rate group, so adding,
+  editing or deleting one line can move a cent onto a line that is already displayed; a stream
+  targeting only the written row would leave the Total TTC column no longer summing to the footer,
+  which is exactly the outcome the allocation exists to prevent. The add-item form lives in the
+  table's `tfoot`, outside the body, so re-rendering the body does not disturb the form reset or
+  the focus retention above.
 - Validation errors on a Turbo request respond with 422, otherwise the form is not re-rendered.
 - Redirects after DELETE and PATCH use 303.
 - The quote creation form lives inside a Turbo Frame but redirects to another screen, so it carries
@@ -651,6 +658,10 @@ one.
   The rate matters: at 20 % the per-line remainder never exceeds 0,8 cents, so the upper bound is
   not reachable and the test would prove less than it looks.
 - A tie on the remainder, verifying the `id` tie-break makes the outcome deterministic across runs.
+- An item write that moves a cent onto a line that is already on screen, asserted on the Turbo
+  Stream body rather than on `QuoteTotals`, since the failure is in the rendering rather than in the
+  computation: three lines at 10 % where creating, editing or deleting one of them shifts another
+  one's Total TTC.
 - A quote with several rates, asserting both named invariants from Testing strategy.
 - A direct `PATCH` and a direct `DELETE` on an item of a validated quote, and on the validated quote
   itself, asserting the refusal and that no data changed.

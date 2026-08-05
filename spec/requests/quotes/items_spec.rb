@@ -27,7 +27,7 @@ RSpec.describe "Quotes::Items", type: :request do
         item = QuoteItem.last
         rendered = Capybara.string(response.body)
 
-        expect(rendered).to have_css("turbo-stream[action='append'][target='quote_items']")
+        expect(rendered).to have_css("turbo-stream[action='update'][target='quote_items']")
         expect(rendered).to have_css("turbo-stream[action='replace'][target='new_item']")
         expect(rendered).to have_css("turbo-stream[action='replace'][target='quote_totals']")
         expect(response.body).to include(item.name)
@@ -72,7 +72,7 @@ RSpec.describe "Quotes::Items", type: :request do
         rendered = Capybara.string(response.body)
 
         expect(rendered).to have_css("turbo-stream[action='replace'][target='new_item']")
-        expect(rendered).to have_no_css("turbo-stream[action='append']")
+        expect(rendered).to have_no_css("turbo-stream[action='update'][target='quote_items']")
         expect(rendered).to have_no_css("turbo-stream[action='replace'][target='quote_totals']")
         expect(response.body).to include('class="inline-form__errors"')
         expect(response.body).to include(%(name="quote_item[name]"))
@@ -95,7 +95,7 @@ RSpec.describe "Quotes::Items", type: :request do
 
   describe "PATCH /quotes/:quote_id/items/:id" do
     context "with valid attributes" do
-      it "updates the item and replaces its row and the totals block" do
+      it "updates the item and re-renders the table body and the totals block" do
         item = create(:quote_item, quote: quote, name: "Ancien nom")
 
         patch quote_item_path(quote, item),
@@ -106,7 +106,7 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(item.reload.name).to eq("Nouveau nom")
 
         rendered = Capybara.string(response.body)
-        expect(rendered).to have_css("turbo-stream[action='replace'][target='frame_quote_item_#{item.id}']")
+        expect(rendered).to have_css("turbo-stream[action='update'][target='quote_items']")
         expect(rendered).to have_css("turbo-stream[action='replace'][target='quote_totals']")
         expect(response.body).to include("Nouveau nom")
       end
@@ -148,7 +148,7 @@ RSpec.describe "Quotes::Items", type: :request do
   end
 
   describe "DELETE /quotes/:quote_id/items/:id" do
-    it "destroys the item and responds with a stream removing the row and refreshing the totals" do
+    it "destroys the item and responds with a stream re-rendering the table body and the totals" do
       item = create(:quote_item, quote: quote)
 
       expect {
@@ -157,8 +157,9 @@ RSpec.describe "Quotes::Items", type: :request do
 
       expect(response).to have_http_status(:ok)
       rendered = Capybara.string(response.body)
-      expect(rendered).to have_css("turbo-stream[action='remove'][target='quote_item_#{item.id}']")
+      expect(rendered).to have_css("turbo-stream[action='update'][target='quote_items']")
       expect(rendered).to have_css("turbo-stream[action='replace'][target='quote_totals']")
+      expect(response.body).not_to include(ActionView::RecordIdentifier.dom_id(item))
     end
 
     it "disables the validate button again once the last item is destroyed" do
@@ -186,6 +187,61 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(response).to redirect_to(quote_path(validated_quote))
         expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
       end
+    end
+  end
+
+  # The largest-remainder allocation redistributes cents inside a rate group, so a write on one
+  # item can move the VAT, and therefore the displayed Total TTC, of lines that are already on
+  # screen. A stream touching only the written row would leave the Total TTC column no longer
+  # summing to the totals block, which is the one property the whole computation exists to
+  # produce. See docs/logbook.md, "The VAT computation contract".
+  describe "a write that shifts the cent allocation of the other lines" do
+    # 0,17 € and 0,57 € at 10 % both floor with a 0.7 cent remainder, and the group's
+    # authoritative VAT leaves exactly one cent to distribute, so the id tie-break gives it to
+    # the first line: 0,02 € and 0,05 €.
+    let!(:first_item) do
+      create(:quote_item, quote: quote, name: "Premier", quantity: 1, unit_price_excl_vat: "0.17", vat_rate: 10)
+    end
+    let!(:second_item) do
+      create(:quote_item, quote: quote, name: "Second", quantity: 1, unit_price_excl_vat: "0.57", vat_rate: 10)
+    end
+
+    def rendered_gross_amount_for(item)
+      # The rows sit inside a <turbo-stream><template>, whose content Capybara's string parser
+      # strips, so this reads the response with Nokogiri directly.
+      Nokogiri::HTML(response.body)
+        .at_css("##{ActionView::RecordIdentifier.dom_id(item)} .items-row__cell--gross-preview")
+        &.text&.strip
+    end
+
+    it "re-renders the sibling rows when a created item moves a cent" do
+      # The third line drops the second one's remainder rank, so its VAT goes from 0,05 € to
+      # 0,06 € and its Total TTC from 0,62 € to 0,63 €.
+      post quote_items_path(quote),
+           params: { quote_item: { name: "Troisième", quantity: "1", unit_price_excl_vat: "0.17", vat_rate: "10" } },
+           as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(rendered_gross_amount_for(second_item)).to eq("0,63\u{202F}€")
+    end
+
+    it "re-renders the sibling rows when an updated item moves a cent" do
+      patch quote_item_path(quote, first_item),
+            params: { quote_item: { name: "Premier", quantity: "1", unit_price_excl_vat: "0.03", vat_rate: "10" } },
+            as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(rendered_gross_amount_for(second_item)).to eq("0,63\u{202F}€")
+    end
+
+    it "re-renders the sibling rows when a destroyed item gives a cent back" do
+      third_item = create(:quote_item, quote: quote, name: "Troisième", quantity: 1,
+                                       unit_price_excl_vat: "0.17", vat_rate: 10)
+
+      delete quote_item_path(quote, third_item), as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(rendered_gross_amount_for(second_item)).to eq("0,62\u{202F}€")
     end
   end
 

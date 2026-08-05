@@ -13,10 +13,10 @@
     </tr>
   </thead>
   <tbody id="quote_items">
-    <% totals.lines.each do |line| %>
-      <% if quote.draft? %>
-        <%= render "quotes/items/item_row", item: line.item, line: line %>
-      <% else %>
+    <% if quote.draft? %>
+      <%= render "quotes/items/rows", lines: totals.lines %>
+    <% else %>
+      <% totals.lines.each do |line| %>
         <tr>
           <td><%= line.item.name %></td>
           <td><%= number_with_precision(line.item.quantity, strip_insignificant_zeros: true) %></td>

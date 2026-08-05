@@ -42,6 +42,29 @@ RSpec.describe "Quote screen, item table", type: :system do
     expect(QuoteItem.count).to eq(0)
   end
 
+  # The edit form lives inside the row's own Turbo Frame while the stream it gets back targets the
+  # table body, an ancestor of that frame. A request spec sees a correct stream either way; only a
+  # browser proves Turbo applies it rather than looking for a matching frame.
+  it "edits an item in place and updates the row and the totals in one response" do
+    quote = create(:quote)
+    create(:quote_item, quote: quote, name: "Location de salle", quantity: 1, unit_price_excl_vat: 100,
+                        vat_rate: 20)
+
+    visit quote_path(quote)
+
+    click_link "Éditer"
+    fill_in "quote_item_unit_price_excl_vat", with: "200"
+    click_button "Valider"
+
+    expect(page).to have_no_field("quote_item_unit_price_excl_vat")
+    expect(page).to have_content("200,00\u{202F}€")
+    within "#quote_totals" do
+      expect(page).to have_content("240,00\u{202F}€")
+    end
+    expect(page).to have_no_content("Content missing")
+    expect(quote.quote_items.sole.unit_price_excl_vat).to eq(BigDecimal("200"))
+  end
+
   it "dismisses the add-item row on Escape, persisting nothing and issuing no request" do
     quote = create(:quote)
     visit quote_path(quote)
