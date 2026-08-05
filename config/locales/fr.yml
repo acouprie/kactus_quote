@@ -28,8 +28,6 @@
 #       enabled: "ON"
 
 fr:
-  hello: "Bonjour le monde"
-
   date:
     formats:
       default: "%d/%m/%Y"
@@ -94,7 +92,6 @@ fr:
     show: "Voir"
     destroy: "Supprimer"
     destroy_confirm: "Voulez-vous vraiment supprimer ce devis ?"
-    back_to_list: "Retour à la liste"
     form:
       name_placeholder: "Nom du devis"
       submit: "Valider"
