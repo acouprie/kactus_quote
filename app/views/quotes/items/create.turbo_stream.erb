@@ -1,6 +1,9 @@
 <% if @item.persisted? %>
-  <%= turbo_stream.append "quote_items" do %>
-    <%= render "quotes/items/item_row", item: @item, line: @totals.lines.find { |line| line.item == @item } %>
+  <%# The whole table body is re-rendered rather than the new row appended: a new line can move
+      a cent of its rate group's VAT onto another line, so a row already on screen may now
+      display a different Total TTC. See docs/logbook.md, "The VAT computation contract". %>
+  <%= turbo_stream.update "quote_items" do %>
+    <%= render "quotes/items/rows", lines: @totals.lines %>
   <% end %>
 
   <%= turbo_stream.replace "new_item" do %>

@@ -164,7 +164,7 @@ Both guards read the **persisted** status, never the in-memory one: the transiti
 refuse itself.
 
 Validation itself needs no diagram of its own. `Quotes::ValidationsController#create` calls
-`finalize!` inside `with_lock`, which re-reads the quote under lock, refuses with a 422 if it has no
+`finalize` inside `with_lock`, which re-reads the quote under lock, refuses with a 422 if it has no
 item, refuses with the immutability error if it is already validated, and otherwise writes `status`
 and `validated_at` before redirecting to the read-only screen with a 303.
 
@@ -205,8 +205,8 @@ sequenceDiagram
         M-->>C: saved, transaction commits
         C->>T: compute the breakdown and the totals
         T-->>C: line amounts, net, VAT and gross totals
-        C-->>B: 200, turbo_stream with three actions
-        Note over B: append the row to #quote_items,<br/>reset the new_item frame and keep focus,<br/>replace #quote_totals
+        C-->>B: 200, turbo_stream with four actions
+        Note over B: update #quote_items with every row,<br/>reset the new_item frame and keep focus,<br/>replace #quote_totals,<br/>replace #quote_validate_button
     else item is invalid
         C->>M: build and save
         M-->>C: rejected, errors present
@@ -220,8 +220,12 @@ sequenceDiagram
     end
 ```
 
-Editing an item follows the same shape, with `PATCH /quotes/{quote_id}/items/{id}` and a `replace`
-on the existing row instead of an `append`. Deleting follows it with a `remove` on the row.
+Editing an item follows the same shape, with `PATCH /quotes/{quote_id}/items/{id}`, and deleting
+with `DELETE`. All three re-render the whole table body rather than the single row they touch,
+because the cent allocation is computed per rate group: a write on one line can move a cent onto
+another line that is already on screen. Targeting only the written row would leave the Total TTC
+column no longer summing to the totals block, which is precisely the property the computation
+exists to produce. See [logbook.md](logbook.md), section "The VAT computation contract".
 
 A stream body answers 200, not 201, on every successful write, create included: the request specs
 assert on it directly and Turbo does not distinguish the two for a stream response, so 200 stays

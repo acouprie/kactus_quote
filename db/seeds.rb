@@ -42,13 +42,12 @@ end
 # An empty draft.
 Quote.find_or_create_by!(name: "Brouillon vide")
 
-# An already validated quote.
-quote = Quote.find_or_create_by!(name: "Cocktail d'entreprise") do |q|
-  q.status = :validated
-  q.validated_at = 3.days.ago
-end
-if quote.quote_items.none?
+# An already validated quote. Items are immutable once the quote is validated, so they have to be
+# added while it is still a draft; the quote is only finalized once they are in place.
+quote = Quote.find_or_create_by!(name: "Cocktail d'entreprise")
+if quote.draft?
   quote.quote_items.create!(name: "Location de salle", quantity: 1, unit_price_excl_vat: 900, vat_rate: 20)
   quote.quote_items.create!(name: "Cocktail dînatoire (30 personnes)", quantity: 30, unit_price_excl_vat: 38,
                              vat_rate: 10)
+  quote.finalize
 end

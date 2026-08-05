@@ -236,8 +236,11 @@ decimal arithmetic natively, which matters here (see Money representation).
 
 Everything runs through Docker Compose: the application, PostgreSQL, and a
 `selenium/standalone-chromium` service for the system tests, so the project starts on any machine
-without installing Ruby, Postgres or Chrome locally, and so CI runs the exact same command as a
-developer does locally.
+without installing Ruby, Postgres or Chrome locally. CI does not run inside that same image: the
+GitHub Actions `test` job installs Ruby directly on `ubuntu-latest`, with Postgres and Selenium as
+service containers rather than `docker compose`. The `bundle exec rspec` command is identical either
+way, and both service images are pinned to the versions `docker-compose.yml` uses, but the
+surrounding environment is not the same.
 
 `db/seeds.rb` creates a handful of quotes covering the cases that are hard to see otherwise: several
 VAT rates on one quote, a rate group where the cent reallocation actually fires, a quote made only
@@ -341,8 +344,9 @@ README rather than left implicit:
 - System specs, driving a real browser, only where the behaviour cannot be observed from a
   request spec: a redirect out of a Turbo Frame that a request spec reads as a correct 303 while
   the browser renders "Content missing", focus retention between two submissions, dismissal by
-  the Escape key, and the composition of all of it on the full quote flow. Four in total. The
-  rule is the boundary, not the count: anything a request spec can assert is asserted there,
+  the Escape key, confirmation dialogs (`turbo_confirm`), and the composition of all of it on the
+  full quote flow. Four files, not four examples: several of them carry more than one example, and
+  the rule is the boundary, not the count. Anything a request spec can assert is asserted there,
   since it is faster and it fails more precisely.
 - Nothing on framework behaviour that no project-specific rule depends on.
 
@@ -353,8 +357,8 @@ examples, because they are the properties the whole money section exists to prod
 - The lines sum to the totals, column by column: the sum of the line net amounts equals the quote's
   net total, and likewise for VAT and gross.
 
-All three levels run on every push via GitHub Actions, system tests included, since they are the
-ones most likely to catch a regression the other two miss.
+All three levels run in CI on every pull request and on every push to `main`, system tests
+included, since they are the ones most likely to catch a regression the other two miss.
 
 ### Project initialization
 
@@ -376,7 +380,7 @@ for the validation action.
 
 - **Quote** (ActiveRecord): holds the central rule. It refuses any mutation of itself (rename,
   delete, re-validate) once its **persisted** status is `validated`. It is the model, not the
-  controller, that decides. It exposes `finalize!` for the business transition. Items are declared
+  controller, that decides. It exposes `finalize` for the business transition. Items are declared
   with `dependent: :destroy` and ordered by `id` ascending, which is both the display order and the
   deterministic tie-break used by the allocation below.
 - **QuoteItem** (ActiveRecord): refuses creation, update and destruction once its parent quote's
@@ -411,8 +415,10 @@ One word is unavoidably overloaded and worth a glossary line, since the project 
 meanings: **"validation"** means an ActiveRecord validation everywhere except in
 `Quotes::ValidationsController`, `validated_at`, `Quote#validated?` and the "Valider le devis"
 button, where it means the business transition from draft to committed. The business transition is
-never a method named `validate`, to avoid colliding with ActiveModel; the model exposes `finalize!`
-and the domain word stays in the interface and in the route.
+never a method named `validate`, to avoid colliding with ActiveModel; the model exposes `finalize`
+and the domain word stays in the interface and in the route. No bang: the method returns a boolean
+and populates `errors` on failure, exactly like `save`, so it does not carry the raising promise a
+bang name would make.
 
 #### Internationalization and formatting
 
@@ -600,8 +606,15 @@ Stream flash rather than a full page error.
 
 #### Turbo and Stimulus specifics
 
-- An action on an item updates two zones, the item's row and the totals block. Handled with a
-  multi-target Turbo Stream response, targets named via `dom_id`.
+- An action on an item updates three zones, the table body, the totals block and the validate
+  button. Handled with a multi-target Turbo Stream response, targets named via `dom_id`.
+- The table body is re-rendered whole on every item write, rather than appending, replacing or
+  removing the single row that was touched. The cent allocation runs per rate group, so adding,
+  editing or deleting one line can move a cent onto a line that is already displayed; a stream
+  targeting only the written row would leave the Total TTC column no longer summing to the footer,
+  which is exactly the outcome the allocation exists to prevent. The add-item form lives in the
+  table's `tfoot`, outside the body, so re-rendering the body does not disturb the form reset or
+  the focus retention above.
 - Validation errors on a Turbo request respond with 422, otherwise the form is not re-rendered.
 - Redirects after DELETE and PATCH use 303.
 - The quote creation form lives inside a Turbo Frame but redirects to another screen, so it carries
@@ -616,6 +629,10 @@ Stream flash rather than a full page error.
   the server stays the source of truth. The VAT and allocation logic is never duplicated in JS,
   since a per-line JS estimate would disagree with the reconciled server value.
 - Deletion is confirmed with `turbo_confirm`.
+- Validation is confirmed with `turbo_confirm` too, since it is the one transition with no way
+  back: a mis-click here cannot be undone the way a mis-typed name or a wrong item can. This is an
+  addition to the Figma, same class of decision as the cancel button on the add-item row, and
+  logged here for the same reason: an unreviewed UI decision should not read as an oversight.
 
 #### Ordering
 
@@ -645,13 +662,19 @@ one.
   The rate matters: at 20 % the per-line remainder never exceeds 0,8 cents, so the upper bound is
   not reachable and the test would prove less than it looks.
 - A tie on the remainder, verifying the `id` tie-break makes the outcome deterministic across runs.
+- An item write that moves a cent onto a line that is already on screen, asserted on the Turbo
+  Stream body rather than on `QuoteTotals`, since the failure is in the rendering rather than in the
+  computation: three lines at 10 % where creating, editing or deleting one of them shifts another
+  one's Total TTC.
 - A quote with several rates, asserting both named invariants from Testing strategy.
 - A direct `PATCH` and a direct `DELETE` on an item of a validated quote, and on the validated quote
   itself, asserting the refusal and that no data changed.
 
 ### Code conventions
 
-The code follows the [Ruby style guide](https://rubystyle.guide/), checked by RuboCop locally at pre-commit and in CI on every push.
+The code follows the [Ruby style guide](https://rubystyle.guide/), checked by RuboCop in CI on every
+pull request and on every push to `main`. A local pre-commit hook runs it too, but the hook lives in
+`.git/hooks/` rather than being versioned, so it only exists on this machine.
 
 The code is written in English, including comments, commit messages and identifiers. User-facing
 strings are French and live in the locale files.
@@ -662,8 +685,61 @@ prefix indicating the type of work, followed by the story number and name, in En
 `feature/1_story_name`. Commits are in English and briefly describe the change using
 [Gitmoji](https://gitmoji.dev/).
 
-## Various notes
+## Retrospective
 
-I follow the specifications as closely as possible without over-interpreting. Where the brief was
-silent and the recruiter deliberately left the choice to me, I record the assumption here rather
-than leaving it implicit in the code.
+### What I would keep on a real project
+
+I started by thinking about the architecture and the interactions between components, and made
+diagrams before writing any code. They live in [`architecture.md`](architecture.md). Writing the
+architecture down first gives a reference to check the code against as it evolves, and it forced
+several decisions (the VAT reconciliation algorithm, the persisted-status guard) to be settled
+before they could hide inside an implementation detail.
+
+A clear architecture, with most
+ambiguities already resolved in writing, makes it possible to write short, self-contained Kanban
+tickets that an AI coding agent can implement correctly with little back and forth. The job posting
+is explicit that the Tech Lead is expected to drive AI adoption in the squad's workflows, not just
+use AI individually, and this is the concrete mechanism I would bring: the leverage does not come
+from the AI, it comes from the quality of the specification handed to it.
+
+### What went well
+
+Mostly, the project went well. I was able to implement all the requirements, and I split the test
+suite by risk rather than by habit: dense unit specs on `QuoteTotals`, request specs on the
+immutability rule and the other business-critical paths, and system specs kept to the four cases
+that cannot be observed any other way, a redirect out of a Turbo Frame, focus retention, dismissal
+by Escape, and the full quote flow. That structure is one of the things I would call a real win,
+since the level of testing tracks the risk of each part instead of aiming for a flat coverage
+number.
+
+Another thing that went well is that the trade-offs stayed visible instead of getting buried in the
+code. The "Deliberately kept simple" section lists what I chose not to build and what it would cost
+to add, so a reviewer can tell a decision was made on purpose rather than missed.
+
+### What I would do differently
+
+Even if it was useful to write the architecture down before coding, I spent a lot of time on it.
+Overall, I would try to use my time more efficiently. I understand time is a limited resource, and
+it is always a trade-off between spending time on design and spending time on implementation. I
+always want to produce the best possible code, but I need to be more pragmatic and focus on the
+most important things. This logbook is a good example of that: at close to 700 lines, it is likely
+too much for a technical test.
+
+### What I learned
+
+I learned that VAT computation on an invoicing document is not just an arithmetic problem, it is
+governed by legal rules, and getting the aggregation right means following them rather than picking
+a convenient rounding strategy. The EN 16931 semantic model, which underpins Factur-X and French
+e-invoicing, sets out precisely how a document's totals must be built from its lines: VAT is
+computed once per category and rate on their combined taxable amount (BR-S-08, BR-CO-17), not line
+by line, and the document's totals are sums of those per-category amounts (BR-CO-10, BR-CO-13,
+BR-CO-14, BR-CO-15). Adopting these invoicing rules for a quote is a choice,
+not a legal obligation, but it is the only way to guarantee the quote will match the invoice that
+follows it.
+
+I also learned to be careful with Turbo Frames and redirects. A redirect issued to a form living
+inside a Turbo Frame is followed inside that frame by default, and if the target page has no frame
+with a matching id, Turbo shows "Content missing" instead of navigating. A request spec reading a
+correct 303 response cannot catch this, since it never renders a page. It is why the quote creation
+form carries `data-turbo-frame="_top"`, and why one of the four system specs exists specifically to
+exercise that redirect in a real browser.

@@ -1,4 +1,9 @@
-<%= turbo_stream.remove @item %>
+<%# The whole table body is re-rendered rather than the row removed: dropping a line can move a
+    cent of its rate group's VAT onto another line, so a row already on screen may now display a
+    different Total TTC. See docs/logbook.md, "The VAT computation contract". %>
+<%= turbo_stream.update "quote_items" do %>
+  <%= render "quotes/items/rows", lines: @totals.lines %>
+<% end %>
 
 <%= turbo_stream.replace "quote_totals" do %>
   <%= render "quotes/totals", totals: @totals %>

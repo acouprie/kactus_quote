@@ -3,9 +3,7 @@ module Quotes
     before_action :set_quote
 
     def create
-      @quote.with_lock { @quote.finalize! }
-
-      if @quote.errors.empty?
+      if @quote.with_lock { @quote.finalize }
         redirect_to @quote, status: :see_other
       else
         render status: :unprocessable_content

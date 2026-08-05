@@ -58,6 +58,6 @@ class QuoteItem < ApplicationRecord
     scale = self.class.columns_hash[attribute.to_s].scale
     return if decimal_part.length <= scale
 
-    errors.add(attribute, "has too many decimal places")
+    errors.add(attribute, :too_many_decimals)
   end
 end

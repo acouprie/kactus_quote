@@ -1,6 +1,9 @@
 <% if @item.errors.empty? %>
-  <%= turbo_stream.replace dom_id(@item, :frame) do %>
-    <%= render "quotes/items/item_display_frame", item: @item, line: @totals.lines.find { |line| line.item == @item } %>
+  <%# The whole table body is re-rendered rather than the edited row alone: changing a line can
+      move a cent of its rate group's VAT onto another line, so a row already on screen may now
+      display a different Total TTC. See docs/logbook.md, "The VAT computation contract". %>
+  <%= turbo_stream.update "quote_items" do %>
+    <%= render "quotes/items/rows", lines: @totals.lines %>
   <% end %>
 
   <%= turbo_stream.replace "quote_totals" do %>
@@ -8,6 +11,6 @@
   <% end %>
 <% else %>
   <%= turbo_stream.replace dom_id(@item, :frame) do %>
-    <%= render "quotes/items/item_edit_frame", quote: @quote, item: @item %>
+    <%= render "quotes/items/item_edit_frame", quote: @quote, item: @item, line: @totals.lines.find { |line| line.item == @item } %>
   <% end %>
 <% end %>
