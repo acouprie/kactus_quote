@@ -25,6 +25,23 @@ RSpec.describe "Quote screen, item table", type: :system do
     expect(QuoteItem.count).to eq(3)
   end
 
+  it "destroys the quote's only item via its icon button without submitting the rename form" do
+    quote = create(:quote, name: "Nom du devis")
+    create(:quote_item, quote: quote, name: "Article à supprimer")
+
+    visit quote_path(quote)
+
+    accept_confirm do
+      click_button "Supprimer"
+    end
+
+    expect(page).to have_current_path(quote_path(quote))
+    expect(page).to have_no_content("Article à supprimer")
+    expect(Quote.exists?(quote.id)).to be(true)
+    expect(quote.reload.name).to eq("Nom du devis")
+    expect(QuoteItem.count).to eq(0)
+  end
+
   it "dismisses the add-item row on Escape, persisting nothing and issuing no request" do
     quote = create(:quote)
     visit quote_path(quote)

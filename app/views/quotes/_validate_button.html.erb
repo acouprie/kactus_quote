@@ -1,0 +1,12 @@
+<div id="quote_validate_button" class="quote-validate">
+  <%= button_to quote_validation_path(quote),
+        class: "button button--validate",
+        disabled: quote.quote_items.empty?,
+        title: (t("quotes.quote_screen.validate_disabled_title") if quote.quote_items.empty?),
+        data: { turbo_confirm: t("quotes.quote_screen.validate_confirm") } do %>
+    <%= validate_button_content(t("quotes.quote_screen.validate")) %>
+  <% end %>
+  <% if quote.quote_items.empty? %>
+    <p class="hint"><%= t("quotes.quote_screen.validate_disabled_title") %></p>
+  <% end %>
+</div>
