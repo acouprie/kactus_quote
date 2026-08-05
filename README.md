@@ -162,8 +162,11 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` and on 
 - `lint`: RuboCop
 
 System specs run in CI rather than being skipped there, since they are the level most likely to
-catch a regression the other two miss. CI runs the same command a developer runs locally, in the
-same environment.
+catch a regression the other two miss. The `bundle exec rspec` command is the same one a developer
+runs locally, and the PostgreSQL and Selenium images are pinned to the same versions as
+`docker-compose.yml`, but the surrounding environment is not: the `test` job installs Ruby directly
+on `ubuntu-latest` with `ruby/setup-ruby`, using Postgres and Selenium as GitHub Actions service
+containers rather than the project's own Docker image.
 
 Brakeman's `EOLRails` check is disabled in `config/brakeman.yml`. Rails 7.2 security support ends on
 2026-08-09, and this application is a short-lived technical exercise rather than something running
