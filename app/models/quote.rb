@@ -11,7 +11,7 @@ class Quote < ApplicationRecord
   before_update :raise_if_validated_in_database
   before_destroy :raise_if_validated_in_database
 
-  def finalize!
+  def finalize
     self.status = :validated
     self.validated_at = Time.current
     save(context: :finalize)
@@ -28,7 +28,7 @@ class Quote < ApplicationRecord
     errors.add(:base, :no_item) if quote_items.empty?
   end
 
-  # Reads the persisted status, never the in-memory one: finalize! assigns status = :validated
+  # Reads the persisted status, never the in-memory one: finalize assigns status = :validated
   # before saving, so an in-memory read would make the draft-to-validated transition refuse itself.
   def raise_if_validated_in_database
     raise ImmutableError if validated_in_database?

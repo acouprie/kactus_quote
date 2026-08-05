@@ -164,7 +164,7 @@ Both guards read the **persisted** status, never the in-memory one: the transiti
 refuse itself.
 
 Validation itself needs no diagram of its own. `Quotes::ValidationsController#create` calls
-`finalize!` inside `with_lock`, which re-reads the quote under lock, refuses with a 422 if it has no
+`finalize` inside `with_lock`, which re-reads the quote under lock, refuses with a 422 if it has no
 item, refuses with the immutability error if it is already validated, and otherwise writes `status`
 and `validated_at` before redirecting to the read-only screen with a 303.
 

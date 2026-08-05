@@ -195,7 +195,7 @@ RSpec.describe "Quotes", type: :request do
       it "refuses the deletion, redirecting to the quote screen with a 303 and a flash" do
         quote = create(:quote, status: :draft)
         create(:quote_item, quote: quote)
-        quote.finalize!
+        quote.finalize
 
         expect {
           delete quote_path(quote)

@@ -22,10 +22,10 @@ module Quotes
     end
 
     def update
-      @quote.with_lock { @item.update(item_params) }
+      updated = @quote.with_lock { @item.update(item_params) }
 
       @totals = QuoteTotals.new(@quote)
-      render status: @item.errors.empty? ? :ok : :unprocessable_content
+      render status: updated ? :ok : :unprocessable_content
     end
 
     def destroy

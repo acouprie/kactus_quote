@@ -379,7 +379,7 @@ for the validation action.
 
 - **Quote** (ActiveRecord): holds the central rule. It refuses any mutation of itself (rename,
   delete, re-validate) once its **persisted** status is `validated`. It is the model, not the
-  controller, that decides. It exposes `finalize!` for the business transition. Items are declared
+  controller, that decides. It exposes `finalize` for the business transition. Items are declared
   with `dependent: :destroy` and ordered by `id` ascending, which is both the display order and the
   deterministic tie-break used by the allocation below.
 - **QuoteItem** (ActiveRecord): refuses creation, update and destruction once its parent quote's
@@ -414,8 +414,10 @@ One word is unavoidably overloaded and worth a glossary line, since the project 
 meanings: **"validation"** means an ActiveRecord validation everywhere except in
 `Quotes::ValidationsController`, `validated_at`, `Quote#validated?` and the "Valider le devis"
 button, where it means the business transition from draft to committed. The business transition is
-never a method named `validate`, to avoid colliding with ActiveModel; the model exposes `finalize!`
-and the domain word stays in the interface and in the route.
+never a method named `validate`, to avoid colliding with ActiveModel; the model exposes `finalize`
+and the domain word stays in the interface and in the route. No bang: the method returns a boolean
+and populates `errors` on failure, exactly like `save`, so it does not carry the raising promise a
+bang name would make.
 
 #### Internationalization and formatting
 
@@ -666,9 +668,3 @@ commits, merged into `main` once complete. Story #0 is project setup. Branches a
 prefix indicating the type of work, followed by the story number and name, in English, for example
 `feature/1_story_name`. Commits are in English and briefly describe the change using
 [Gitmoji](https://gitmoji.dev/).
-
-## Various notes
-
-I follow the specifications as closely as possible without over-interpreting. Where the brief was
-silent and the recruiter deliberately left the choice to me, I record the assumption here rather
-than leaving it implicit in the code.

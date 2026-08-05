@@ -44,7 +44,7 @@ RSpec.describe "Quotes::Validations", type: :request do
       it "refuses a second validation, redirecting to the quote screen with a 303 and a flash" do
         quote = create(:quote, status: :draft)
         create(:quote_item, quote: quote)
-        quote.finalize!
+        quote.finalize
         original_validated_at = quote.validated_at
 
         post quote_validation_path(quote)

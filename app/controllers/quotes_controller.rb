@@ -26,9 +26,7 @@ class QuotesController < ApplicationController
   end
 
   def update
-    @quote.with_lock { @quote.update(quote_params) }
-
-    if @quote.errors.empty?
+    if @quote.with_lock { @quote.update(quote_params) }
       redirect_to quotes_path, status: :see_other
     else
       @totals = QuoteTotals.new(@quote)
