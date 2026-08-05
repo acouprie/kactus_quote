@@ -39,10 +39,22 @@ RSpec.describe QuoteItem, type: :model do
       expect(item.save).to be(false)
     end
 
+    it "reports too many decimals in French, like every other user-facing error" do
+      item = build(:quote_item, quantity: "1.755")
+      item.valid?
+      expect(item.errors[:quantity]).to include("ne peut pas avoir plus de 2 décimales")
+    end
+
     it "rejects a value above the upper bound as a validation error, never a database exception" do
       item = build(:quote_item, quantity: 100_000)
       expect { item.valid? }.not_to raise_error
       expect(item).not_to be_valid
+    end
+
+    it "reports the upper bound in French, comma as decimal separator and no leftover dot" do
+      item = build(:quote_item, quantity: 100_000)
+      item.valid?
+      expect(item.errors[:quantity]).to include("doit être inférieur ou égal à 99 999,99")
     end
   end
 
@@ -73,10 +85,22 @@ RSpec.describe QuoteItem, type: :model do
       expect(item.save).to be(false)
     end
 
+    it "reports too many decimals in French, like every other user-facing error" do
+      item = build(:quote_item, unit_price_excl_vat: "1.755")
+      item.valid?
+      expect(item.errors[:unit_price_excl_vat]).to include("ne peut pas avoir plus de 2 décimales")
+    end
+
     it "rejects a value above the upper bound as a validation error, never a database exception" do
       item = build(:quote_item, unit_price_excl_vat: 100_000)
       expect { item.valid? }.not_to raise_error
       expect(item).not_to be_valid
+    end
+
+    it "reports the upper bound in French, comma as decimal separator and no leftover dot" do
+      item = build(:quote_item, unit_price_excl_vat: 100_000)
+      item.valid?
+      expect(item.errors[:unit_price_excl_vat]).to include("doit être inférieur ou égal à 99 999,99")
     end
   end
 
