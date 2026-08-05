@@ -236,8 +236,11 @@ decimal arithmetic natively, which matters here (see Money representation).
 
 Everything runs through Docker Compose: the application, PostgreSQL, and a
 `selenium/standalone-chromium` service for the system tests, so the project starts on any machine
-without installing Ruby, Postgres or Chrome locally, and so CI runs the exact same command as a
-developer does locally.
+without installing Ruby, Postgres or Chrome locally. CI does not run inside that same image: the
+GitHub Actions `test` job installs Ruby directly on `ubuntu-latest`, with Postgres and Selenium as
+service containers rather than `docker compose`. The `bundle exec rspec` command is identical either
+way, and both service images are pinned to the versions `docker-compose.yml` uses, but the
+surrounding environment is not the same.
 
 `db/seeds.rb` creates a handful of quotes covering the cases that are hard to see otherwise: several
 VAT rates on one quote, a rate group where the cent reallocation actually fires, a quote made only
@@ -353,8 +356,8 @@ examples, because they are the properties the whole money section exists to prod
 - The lines sum to the totals, column by column: the sum of the line net amounts equals the quote's
   net total, and likewise for VAT and gross.
 
-All three levels run on every push via GitHub Actions, system tests included, since they are the
-ones most likely to catch a regression the other two miss.
+All three levels run in CI on every pull request and on every push to `main`, system tests
+included, since they are the ones most likely to catch a regression the other two miss.
 
 ### Project initialization
 
@@ -651,7 +654,9 @@ one.
 
 ### Code conventions
 
-The code follows the [Ruby style guide](https://rubystyle.guide/), checked by RuboCop locally at pre-commit and in CI on every push.
+The code follows the [Ruby style guide](https://rubystyle.guide/), checked by RuboCop in CI on every
+pull request and on every push to `main`. A local pre-commit hook runs it too, but the hook lives in
+`.git/hooks/` rather than being versioned, so it only exists on this machine.
 
 The code is written in English, including comments, commit messages and identifiers. User-facing
 strings are French and live in the locale files.
