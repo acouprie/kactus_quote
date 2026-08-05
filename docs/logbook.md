@@ -344,8 +344,9 @@ README rather than left implicit:
 - System specs, driving a real browser, only where the behaviour cannot be observed from a
   request spec: a redirect out of a Turbo Frame that a request spec reads as a correct 303 while
   the browser renders "Content missing", focus retention between two submissions, dismissal by
-  the Escape key, and the composition of all of it on the full quote flow. Four in total. The
-  rule is the boundary, not the count: anything a request spec can assert is asserted there,
+  the Escape key, confirmation dialogs (`turbo_confirm`), and the composition of all of it on the
+  full quote flow. Four files, not four examples: several of them carry more than one example, and
+  the rule is the boundary, not the count. Anything a request spec can assert is asserted there,
   since it is faster and it fails more precisely.
 - Nothing on framework behaviour that no project-specific rule depends on.
 
