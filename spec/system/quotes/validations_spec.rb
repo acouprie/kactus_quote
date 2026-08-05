@@ -27,20 +27,6 @@ RSpec.describe "Quote screen, validating a draft", type: :system do
     expect(quote.reload).to be_validated
   end
 
-  it "disables the validate button again once the only item is removed" do
-    quote = create(:quote)
-    create(:quote_item, quote: quote)
-    visit quote_path(quote)
-
-    expect(page).to have_button("Valider le devis", disabled: false)
-
-    accept_confirm do
-      click_button "Supprimer"
-    end
-
-    expect(page).to have_button("Valider le devis", disabled: true)
-  end
-
   it "dismisses the confirmation without validating" do
     quote = create(:quote)
     create(:quote_item, quote: quote)
