@@ -49,5 +49,5 @@ if quote.draft?
   quote.quote_items.create!(name: "Location de salle", quantity: 1, unit_price_excl_vat: 900, vat_rate: 20)
   quote.quote_items.create!(name: "Cocktail dînatoire (30 personnes)", quantity: 30, unit_price_excl_vat: 38,
                              vat_rate: 10)
-  quote.finalize!
+  quote.finalize
 end

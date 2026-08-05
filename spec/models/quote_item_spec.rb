@@ -91,7 +91,7 @@ RSpec.describe QuoteItem, type: :model do
        "item is loaded independently of the quote, without going through Quotes::ItemsController" do
       quote = create(:quote, status: :draft)
       item = create(:quote_item, quote: quote)
-      quote.finalize!
+      quote.finalize
 
       fresh_item = QuoteItem.find(item.id)
       expect { fresh_item.update(name: "Nouveau nom") }.to raise_error(Quote::ImmutableError)

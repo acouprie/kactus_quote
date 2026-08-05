@@ -30,12 +30,12 @@ RSpec.describe Quote, type: :model do
     expect { item.reload }.to raise_error(ActiveRecord::RecordNotFound)
   end
 
-  describe "#finalize!" do
+  describe "#finalize" do
     it "sets the quote validated with a validation timestamp when it has at least one item" do
       quote = create(:quote, status: :draft)
       create(:quote_item, quote: quote)
 
-      quote.finalize!
+      quote.finalize
 
       expect(quote).to be_validated
       expect(quote.validated_at).to be_present
@@ -44,7 +44,7 @@ RSpec.describe Quote, type: :model do
     it "refuses a quote with no item, leaving it a draft in the database" do
       quote = create(:quote, status: :draft)
 
-      quote.finalize!
+      quote.finalize
 
       expect(quote.errors[:base]).to be_present
       expect(quote.reload).to be_draft
@@ -60,9 +60,9 @@ RSpec.describe Quote, type: :model do
     it "refuses to finalize a quote already validated in the database" do
       quote = create(:quote, status: :draft)
       create(:quote_item, quote: quote)
-      quote.finalize!
+      quote.finalize
 
-      expect { quote.finalize! }.to raise_error(Quote::ImmutableError)
+      expect { quote.finalize }.to raise_error(Quote::ImmutableError)
     end
   end
 

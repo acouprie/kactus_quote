@@ -134,7 +134,7 @@ RSpec.describe "Quotes::Items", type: :request do
       it "refuses the update, redirecting to the quote screen with a 303 and a flash" do
         validated_quote = create(:quote, status: :draft)
         item = create(:quote_item, quote: validated_quote, name: "Ancien nom")
-        validated_quote.finalize!
+        validated_quote.finalize
 
         patch quote_item_path(validated_quote, item),
               params: { quote_item: { name: "Nouveau nom", quantity: "1", unit_price_excl_vat: "10", vat_rate: "20" } }
@@ -176,7 +176,7 @@ RSpec.describe "Quotes::Items", type: :request do
       it "refuses the deletion, redirecting to the quote screen with a 303 and a flash" do
         validated_quote = create(:quote, status: :draft)
         item = create(:quote_item, quote: validated_quote)
-        validated_quote.finalize!
+        validated_quote.finalize
 
         expect {
           delete quote_item_path(validated_quote, item)
