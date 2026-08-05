@@ -48,6 +48,26 @@ RSpec.describe QuoteTotals do
   end
 
   describe "several rates on one quote" do
+    it "computes each line and total against concrete expected figures" do
+      quote = create(:quote)
+      create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 100, vat_rate: 20)
+      create(:quote_item, quote: quote, quantity: 3, unit_price_excl_vat: 10, vat_rate: 10)
+      create(:quote_item, quote: quote, quantity: 2, unit_price_excl_vat: 12.5, vat_rate: 5.5)
+
+      totals = described_class.new(quote)
+
+      # 20 % line: net 1 * 100 = 100.00, vat 20.00, gross 120.00.
+      # 10 % line: net 3 * 10 = 30.00, vat 3.00, gross 33.00.
+      # 5.5 % line: net 2 * 12.5 = 25.00, vat round_half_up(25.00 * 5.5 / 100) = 1.38, gross 26.38.
+      expect(totals.lines.map(&:line_net_amount)).to eq([ BigDecimal("100"), BigDecimal("30"), BigDecimal("25") ])
+      expect(totals.lines.map(&:line_vat_amount)).to eq([ BigDecimal("20"), BigDecimal("3"), BigDecimal("1.38") ])
+      expect(totals.lines.map(&:line_gross_amount)).to eq([ BigDecimal("120"), BigDecimal("33"), BigDecimal("26.38") ])
+
+      expect(totals.total_net_amount).to eq(BigDecimal("155"))
+      expect(totals.total_vat_amount).to eq(BigDecimal("24.38"))
+      expect(totals.total_gross_amount).to eq(BigDecimal("179.38"))
+    end
+
     it "satisfies both invariants: gross = net + vat, and lines sum to totals column by column" do
       quote = create(:quote)
       create(:quote_item, quote: quote, quantity: 1, unit_price_excl_vat: 100, vat_rate: 20)
