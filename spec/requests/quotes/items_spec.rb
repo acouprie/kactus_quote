@@ -129,6 +129,22 @@ RSpec.describe "Quotes::Items", type: :request do
         expect(response.body).to include(%(name="quote_item[name]"))
       end
     end
+
+    context "when the quote is already validated" do
+      it "refuses the update, redirecting to the quote screen with a 303 and a flash" do
+        validated_quote = create(:quote, status: :draft)
+        item = create(:quote_item, quote: validated_quote, name: "Ancien nom")
+        validated_quote.finalize!
+
+        patch quote_item_path(validated_quote, item),
+              params: { quote_item: { name: "Nouveau nom", quantity: "1", unit_price_excl_vat: "10", vat_rate: "20" } }
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quote_path(validated_quote))
+        expect(item.reload.name).to eq("Ancien nom")
+        expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
+      end
+    end
   end
 
   describe "DELETE /quotes/:quote_id/items/:id" do
@@ -154,6 +170,37 @@ RSpec.describe "Quotes::Items", type: :request do
       container = Nokogiri::HTML(response.body).at_css("#quote_validate_button")
       expect(container.at_css("button")["disabled"]).to eq("disabled")
       expect(container.at_css(".hint")).not_to be_nil
+    end
+
+    context "when the quote is already validated" do
+      it "refuses the deletion, redirecting to the quote screen with a 303 and a flash" do
+        validated_quote = create(:quote, status: :draft)
+        item = create(:quote_item, quote: validated_quote)
+        validated_quote.finalize!
+
+        expect {
+          delete quote_item_path(validated_quote, item)
+        }.not_to change(QuoteItem, :count)
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quote_path(validated_quote))
+        expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
+      end
+    end
+  end
+
+  describe "POST /quotes/:quote_id/items when the quote is already validated" do
+    it "refuses the creation, redirecting to the quote screen with a 303 and a flash" do
+      validated_quote = create(:quote, status: :validated, validated_at: Time.current)
+
+      expect {
+        post quote_items_path(validated_quote),
+             params: { quote_item: { name: "Location de salle", quantity: "2", unit_price_excl_vat: "150", vat_rate: "20" } }
+      }.not_to change(QuoteItem, :count)
+
+      expect(response).to have_http_status(:see_other)
+      expect(response).to redirect_to(quote_path(validated_quote))
+      expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
     end
   end
 end

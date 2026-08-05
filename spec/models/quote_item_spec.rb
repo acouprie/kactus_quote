@@ -79,4 +79,26 @@ RSpec.describe QuoteItem, type: :model do
       expect(item).not_to be_valid
     end
   end
+
+  describe "immutability once its quote is validated" do
+    it "refuses to create an item on a quote already validated in the database" do
+      quote = create(:quote, status: :validated, validated_at: Time.current)
+
+      expect { create(:quote_item, quote: quote) }.to raise_error(Quote::ImmutableError)
+    end
+
+    it "refuses to update or destroy an item once its quote has been validated, even when the " \
+       "item is loaded independently of the quote, without going through Quotes::ItemsController" do
+      quote = create(:quote, status: :draft)
+      item = create(:quote_item, quote: quote)
+      quote.finalize!
+
+      fresh_item = QuoteItem.find(item.id)
+      expect { fresh_item.update(name: "Nouveau nom") }.to raise_error(Quote::ImmutableError)
+      expect(item.reload.name).not_to eq("Nouveau nom")
+
+      expect { QuoteItem.find(item.id).destroy }.to raise_error(Quote::ImmutableError)
+      expect(QuoteItem.exists?(item.id)).to be(true)
+    end
+  end
 end

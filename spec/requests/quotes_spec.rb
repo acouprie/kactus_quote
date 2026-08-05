@@ -163,6 +163,19 @@ RSpec.describe "Quotes", type: :request do
         expect(quote.reload.name).to eq("Nom initial")
       end
     end
+
+    context "when the quote is already validated" do
+      it "refuses the rename, redirecting to the quote screen with a 303 and a flash" do
+        quote = create(:quote, name: "Nom initial", status: :validated, validated_at: Time.current)
+
+        patch quote_path(quote), params: { quote: { name: "Nouveau nom" } }
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quote_path(quote))
+        expect(quote.reload.name).to eq("Nom initial")
+        expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
+      end
+    end
   end
 
   describe "DELETE /quotes/:id" do
@@ -176,6 +189,22 @@ RSpec.describe "Quotes", type: :request do
 
       expect(response).to have_http_status(:see_other)
       expect(response).to redirect_to(quotes_path)
+    end
+
+    context "when the quote is already validated" do
+      it "refuses the deletion, redirecting to the quote screen with a 303 and a flash" do
+        quote = create(:quote, status: :draft)
+        create(:quote_item, quote: quote)
+        quote.finalize!
+
+        expect {
+          delete quote_path(quote)
+        }.not_to change(Quote, :count)
+
+        expect(response).to have_http_status(:see_other)
+        expect(response).to redirect_to(quote_path(quote))
+        expect(flash[:alert]).to eq(I18n.t("quotes.quote_screen.immutable_alert"))
+      end
     end
   end
 end
