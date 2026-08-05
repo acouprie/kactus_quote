@@ -17,6 +17,7 @@ module Quotes
     end
 
     def edit
+      @totals = QuoteTotals.new(@quote)
       render layout: false
     end
 
