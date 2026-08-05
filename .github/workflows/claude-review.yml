@@ -30,3 +30,7 @@ jobs:
             - Testability: test coverage for the changes, edge cases missed
 
             Post findings as inline comments on the relevant lines. Keep feedback concise and actionable.
+          claude_args: |
+            --model claude-sonnet-5
+            --max-turns 15
+            --allowedTools "Bash(gh pr:*),Bash(gh api:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Read,Glob,Grep"
