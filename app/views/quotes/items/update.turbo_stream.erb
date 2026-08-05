@@ -8,6 +8,6 @@
   <% end %>
 <% else %>
   <%= turbo_stream.replace dom_id(@item, :frame) do %>
-    <%= render "quotes/items/item_edit_frame", quote: @quote, item: @item %>
+    <%= render "quotes/items/item_edit_frame", quote: @quote, item: @item, line: @totals.lines.find { |line| line.item == @item } %>
   <% end %>
 <% end %>

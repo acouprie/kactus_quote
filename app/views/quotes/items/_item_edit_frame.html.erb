@@ -1,3 +1,4 @@
-<%= turbo_frame_tag dom_id(item, :frame), class: "items-row-frame" do %>
-  <%= render "quotes/items/form", quote: quote, item: item, show_cancel: false %>
+<%= turbo_frame_tag dom_id(item, :frame), class: "items-row-frame",
+      data: { controller: "inline-form", inline_form_trigger_value: render("quotes/items/item_display_content", item: item, line: line) } do %>
+  <%= render "quotes/items/form", quote: quote, item: item, show_cancel: true %>
 <% end %>
