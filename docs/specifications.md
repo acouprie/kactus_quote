@@ -1,12 +1,12 @@
 # Test Technique
 
-Kactus est une marketplace B2B où les entreprises peuvent profiter de la meilleure expérience de réservation pour leurs événements professionnels.
+Cette entreprise édite une marketplace B2B où les entreprises peuvent profiter de la meilleure expérience de réservation pour leurs événements professionnels.
 
-La plateforme jouit d'un catalogue de plus de 8 000 lieux partenaires, triés sur le volet afin de satisfaire tous les besoins événementiels de ses clients. Ces partenaires ont accès à un espace dédié où ils peuvent gérer leur relation contractuelle avec Kactus ainsi que les fiches des lieux qu'ils référencent. Quand une demande de réservation arrive dans le dashboard du partenaire, celui-ci édite un devis sur son logiciel avant d'uploader le devis sur Kactus pour l'envoyer au client.
+La plateforme jouit d'un catalogue de plus de 8 000 lieux partenaires, triés sur le volet afin de satisfaire tous les besoins événementiels de ses clients. Ces partenaires ont accès à un espace dédié où ils peuvent gérer leur relation contractuelle avec la plateforme ainsi que les fiches des lieux qu'ils référencent. Quand une demande de réservation arrive dans le dashboard du partenaire, celui-ci édite un devis sur son logiciel avant d'uploader le devis sur la plateforme pour l'envoyer au client.
 
-Pour entretenir la relation privilégiée que nous avons avec nos partenaires et leur simplifier la vie, nous décidons de développer notre propre éditeur de devis intégré directement dans la plateforme.
+Pour entretenir la relation privilégiée qu'elle a avec ses partenaires et leur simplifier la vie, l'entreprise décide de développer son propre éditeur de devis intégré directement dans la plateforme.
 
-Note : Le projet décrit dans ce test a déjà été conduit et optimisé chez Kactus. De plus il ne représente qu'une version réduite des fonctionnalités que nous proposons. Nous ne nous servons pas du code fourni par nos candidats pour développer cet éditeur de devis.
+Note : Le projet décrit dans ce test a déjà été conduit et optimisé en interne par cette entreprise. De plus il ne représente qu'une version réduite des fonctionnalités proposées. Le code fourni par les candidats n'est pas réutilisé pour développer cet éditeur de devis.
 
 # Livrables
 

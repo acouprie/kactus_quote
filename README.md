@@ -1,6 +1,6 @@
-# Kactus Quote Editor
+# Quote Editor
 
-A quote editor for the partners of the Kactus marketplace, built as a technical exercise.
+A quote editor for the partners of a B2B events marketplace, built as a technical exercise.
 
 A partner lists their quotes, opens one, adds items to it, and reads the running totals excluding
 VAT, VAT and including VAT. Validating a quote commits it: from that point it can no longer be
@@ -171,14 +171,14 @@ containers rather than the project's own Docker image.
 
 Brakeman's `EOLRails` check is disabled in `config/brakeman.yml`. Rails 7.2 security support ends on
 2026-08-09, and this application is a short-lived technical exercise rather than something running
-long-term in production, so the check adds noise without value here. The version is pinned to the
-one in use at Kactus deliberately, see the logbook under
+long-term in production, so the check adds noise without value here. The version is pinned
+deliberately to match a real target stack, see the logbook under
 [Implementation choices](docs/logbook.md#implementation-choices).
 
 ## Definition of Done
 
-Reusing Kactus's own process vocabulary (success criteria set together, breakdown into deliverable
-increments, a "done" covering tests, UX and tracking), a story is done when:
+Reusing a standard agile process vocabulary (success criteria set together, breakdown into
+deliverable increments, a "done" covering tests, UX and tracking), a story is done when:
 
 - Behaviour matches the functional requirement and the Figma, including the edge cases and
   assumptions recorded in the logbook.

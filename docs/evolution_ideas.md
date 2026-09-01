@@ -6,10 +6,10 @@ ordered by priority.
 **Product**
 
 What would move the tool closer to actually replacing the partner's current process (editing a quote
-outside Kactus, then uploading it):
+outside the platform, then uploading it):
 
 1. Export the quote as a PDF. Closest to the tool's stated purpose; without it, partners still
-   cannot hand a quote to a client from within Kactus.
+   cannot hand a quote to a client from within the platform.
 2. Send the quote directly by email, if a client email address is registered.
 3. Client-side acceptance of a quote (electronic signature).
 4. Identification of the client or business a quote is for, currently missing from the data model
@@ -60,7 +60,7 @@ scale". The first four are the items from "Deliberately kept simple".
 10. Background jobs for anything that should not block the request once it exists (PDF generation,
     emails).
 11. Observability: structured logging, error tracking, basic metrics.
-12. Scaling considerations for Kactus's actual partner volume (8,000+ partners): indexing, N+1
+12. Scaling considerations for the platform's actual partner volume (8,000+ partners): indexing, N+1
     prevention beyond the list view, caching totals if computing them live becomes a bottleneck.
 
 **Process**
